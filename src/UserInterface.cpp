@@ -39,10 +39,12 @@ void UserInterface::show() {
     }
 
     bool saveVideo = sceneManager->getSaveVideo();
-
     if (ImGui::Checkbox("Save video", &saveVideo)) {
         sceneManager->setSaveVideo(saveVideo);
     }
+
+    ImGuiInputTextFlags flags = (saveVideo && sceneManager->getPlay()) ? ImGuiInputTextFlags_ReadOnly : 0;
+    ImGui::InputText("Output name", sceneManager->saveFilename, IM_ARRAYSIZE(sceneManager->saveFilename), flags);
 
     ImGui::Text("Scene Parameters");
 

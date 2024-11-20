@@ -33,6 +33,8 @@ public:
     bool getSaveVideo() { return saveVideo; }
     void setSaveVideo(bool value) { saveVideo = value; }
 
+    char saveFilename[128] = "video";
+
 private:
     Scene *scene;
     Timer timer;

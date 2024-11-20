@@ -37,6 +37,8 @@ SceneManager sceneManager;
 glm::vec3 lightPos(5.0f, 0.0f, 5.0f);
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
+int frameCount = 0;
+
 bool create_directories_if_needed(const std::string &filePath) {
     try {
         // Récupère uniquement le chemin du dossier sans le fichier
@@ -66,11 +68,12 @@ void SaveScreenshot(const char *filename) {
     }
 
     // Sauvegarder l'image au format PNG
-    if (stbi_write_png(filename, SCR_WIDTH, SCR_HEIGHT, 3, pixels.data(), SCR_WIDTH * 3)) {
-        std::cout << "Screenshot saved to " << filename << std::endl;
-    } else {
-        std::cout << "Failed to save screenshot" << std::endl;
-    }
+    if (create_directories_if_needed(filename))
+        if (stbi_write_png(filename, SCR_WIDTH, SCR_HEIGHT, 3, pixels.data(), SCR_WIDTH * 3)) {
+            std::cout << "Screenshot saved to " << filename << std::endl;
+        } else {
+            std::cout << "Failed to save screenshot" << std::endl;
+        }
 }
 
 // Callback functions
@@ -207,13 +210,16 @@ int main() {
         sceneManager.updateScene();
         sceneManager.drawScene(shaderProgram);
 
-        if (sceneManager.getSaveVideo()) {
-        }
-
         userInterface.show();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        if (sceneManager.getSaveVideo() && sceneManager.getPlay()) {
+            std::string filename = "data/output/" + std::string(sceneManager.saveFilename) + "/" + std::to_string(frameCount) + ".png";
+            SaveScreenshot(filename.c_str());
+            frameCount++;
+        }
     }
 
     glfwDestroyWindow(window);

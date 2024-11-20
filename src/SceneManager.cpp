@@ -1,8 +1,5 @@
 #include "SceneManager.hpp"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
 void SceneManager::resetScene() {
     Scene *newScene = Scenes::createScene(sceneType, scene);
     delete scene;
@@ -12,6 +9,7 @@ void SceneManager::resetScene() {
 
 void SceneManager::updateScene() {
     dt = timer.elapsed();
+    if (saveVideo) dt = 1.0f / 60;
     if (play) {
         scene->update(dt);
     }
