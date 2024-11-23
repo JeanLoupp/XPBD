@@ -8,8 +8,10 @@ public:
     // Parameters
     int w, h;
     float distance;
+    bool bendingConstraints;
 
-    Cloth(int w = 64, int h = 64, float distance = 0.05f) : w(w), h(h), distance(distance) {
+    Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = false)
+        : w(w), h(h), distance(distance), bendingConstraints(bendingConstraints) {
 
         std::vector<glm::vec3> pos;
         std::vector<Constraint *> constraints;
@@ -43,10 +45,12 @@ public:
                 // if (y != h - 1 && x < w - 2)
                 //     constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, y * w + x + 2, M_PI));
 
-                if (y < h - 2)
-                    constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2));
-                if (x < w - 2)
-                    constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2));
+                if (bendingConstraints) {
+                    if (y < h - 2)
+                        constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2));
+                    if (x < w - 2)
+                        constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2));
+                }
             }
         }
 
@@ -58,7 +62,7 @@ public:
         solver->addFixedPoint(w - 1, pos[w - 1]);
     }
 
-    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance) {}
+    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {}
 
     void draw(ShaderProgram &shaderProgram) override {
         mesh->setVertices(solver->getPos());
@@ -100,6 +104,9 @@ public:
                 changed = true;
             }
         }
+
+        if (ImGui::Checkbox("Bending Constraint", &bendingConstraints))
+            changed = true;
 
         return changed;
     }
