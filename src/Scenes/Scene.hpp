@@ -10,7 +10,7 @@ public:
     Solver *solver;
 
 public:
-    ~Scene() { delete solver; }
+    virtual ~Scene() { delete solver; }
 
     virtual void draw(ShaderProgram &shaderProgram) = 0;
     virtual bool showUI() { return false; }
