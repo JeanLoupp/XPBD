@@ -115,24 +115,27 @@ struct BendingConstraint : public Constraint {
         const glm::vec3 &p3 = pos[particles[2]];
         const glm::vec3 &p4 = pos[particles[3]];
 
-        glm::vec3 n1 = glm::normalize(glm::cross(p2 - p1, p3 - p1));
-        glm::vec3 n2 = glm::normalize(glm::cross(p2 - p1, p4 - p1));
+        glm::vec3 n1 = glm::cross(p2 - p1, p3 - p1);
+        glm::vec3 n2 = glm::cross(p2 - p1, p4 - p1);
 
         float d = glm::dot(n1, n2);
+
+        float norms = glm::length(n1) * glm::length(n2);
+
+        if (norms > 1e-8) {
+            d /= norms;
+        }
+
         d = glm::clamp(d, -1.0f, 1.0f);
 
-        return acos(d) - angle;
-    }
-
-    bool isSatisfied(float val) const override {
-        return val >= 0;
+        return glm::acos(d) - angle;
     }
 
     std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
         const glm::vec3 &p1 = pos[particles[0]];
-        const glm::vec3 &p2 = pos[particles[1]];
-        const glm::vec3 &p3 = pos[particles[2]];
-        const glm::vec3 &p4 = pos[particles[3]];
+        const glm::vec3 p2 = pos[particles[1]] - p1;
+        const glm::vec3 p3 = pos[particles[2]] - p1;
+        const glm::vec3 p4 = pos[particles[3]] - p1;
 
         glm::vec3 n1 = glm::normalize(glm::cross(p2, p3));
         glm::vec3 n2 = glm::normalize(glm::cross(p2, p4));
@@ -140,7 +143,9 @@ struct BendingConstraint : public Constraint {
         float d = glm::dot(n1, n2);
         d = glm::clamp(d, -1.0f, 1.0f);
 
-        const float factor = -1.0f / sqrt(1.0f - d * d);
+        if (d * d > 1 - 1e-8) return {glm::vec3(0), glm::vec3(0), glm::vec3(0), glm::vec3(0)};
+
+        const float factor = 1.0f / sqrt(1.0f - d * d);
 
         q3 = factor * (glm::cross(p2, n2) + glm::cross(n1, p2) * d) / glm::length(glm::cross(p2, p3));
         q4 = factor * (glm::cross(p2, n1) + glm::cross(n2, p2) * d) / glm::length(glm::cross(p2, p4));

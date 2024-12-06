@@ -40,16 +40,16 @@ public:
                 constraints.push_back(new SemiPlaneConstraint(y * w + x, semiPlane));
 
                 // Bending
-                // if (x != w - 1 && y < h - 2)
-                //     constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x, M_PI));
-                // if (y != h - 1 && x < w - 2)
-                //     constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, y * w + x + 2, M_PI));
-
                 if (bendingConstraints) {
-                    if (y < h - 2)
-                        constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2));
-                    if (x < w - 2)
-                        constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2));
+                    if (x != w - 1 && y < h - 2)
+                        constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x + 1, M_PI));
+                    if (y != h - 1 && x < w - 2)
+                        constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, (y + 1) * w + x + 2, M_PI));
+
+                    //     if (y < h - 2)
+                    //         constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2));
+                    //     if (x < w - 2)
+                    //         constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2));
                 }
             }
         }
