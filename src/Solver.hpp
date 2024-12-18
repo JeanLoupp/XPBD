@@ -24,5 +24,5 @@ private:
     std::vector<float> w; // inverse of mass
     float Minv;
 
-    int N_ITERATION = 10;
+    int N_ITERATION = 100;
 };

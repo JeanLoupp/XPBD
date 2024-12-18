@@ -44,7 +44,7 @@ public:
     const std::vector<glm::vec3> &getNormals() const { return normals; }
     const std::vector<unsigned int> &getIndices() const { return indices; }
 
-private:
+protected:
     unsigned int VAO, VBO, NBO, TBO, EBO;
     bool hasNormals, hasTextures;
     size_t indexCount;

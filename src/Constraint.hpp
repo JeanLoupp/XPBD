@@ -190,3 +190,65 @@ struct MinDistanceConstraint : public Constraint {
         return 1.0f * w[particles[0]] + 1.0f * w[particles[1]];
     }
 };
+
+struct VolumeConstraint : public Constraint {
+    float initialVolume;
+
+    // Cache
+    mutable std::vector<glm::vec3> gradients;
+
+    VolumeConstraint(int p1, int p2, int p3, int p4, const std::vector<glm::vec3> &pos) {
+        particles = {p1, p2, p3, p4};
+        gradients.resize(4, glm::vec3(0));
+        initialVolume = calculateInitialVolume(pos);
+    }
+
+    float calculateInitialVolume(const std::vector<glm::vec3> &pos) const {
+        const glm::vec3 &p1 = pos[particles[0]];
+        const glm::vec3 &p2 = pos[particles[1]];
+        const glm::vec3 &p3 = pos[particles[2]];
+        const glm::vec3 &p4 = pos[particles[3]];
+
+        return glm::dot(glm::cross(p2 - p1, p3 - p1), p4 - p1) / 6.0f;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        const glm::vec3 &p1 = pos[particles[0]];
+        const glm::vec3 &p2 = pos[particles[1]];
+        const glm::vec3 &p3 = pos[particles[2]];
+        const glm::vec3 &p4 = pos[particles[3]];
+
+        float volume = glm::dot(glm::cross(p2 - p1, p3 - p1), p4 - p1) / 6.0f;
+        return 6.0 * (volume - initialVolume);
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        const glm::vec3 &p1 = pos[particles[0]];
+        const glm::vec3 &p2 = pos[particles[1]];
+        const glm::vec3 &p3 = pos[particles[2]];
+        const glm::vec3 &p4 = pos[particles[3]];
+
+        glm::vec3 v1 = p2 - p1;
+        glm::vec3 v2 = p3 - p1;
+        glm::vec3 v3 = p4 - p1;
+
+        gradients[0] = glm::cross(p4 - p2, p3 - p2);
+        gradients[1] = glm::cross(v2, v3);
+        gradients[2] = glm::cross(v3, v1);
+        gradients[3] = glm::cross(v1, v2);
+
+        return gradients;
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        float norm2 = 0.0f;
+        for (size_t i = 0; i < gradients.size(); ++i) {
+            norm2 += w[particles[i]] * glm::length2(gradients[i]);
+        }
+        return norm2;
+    }
+
+    bool isSatisfied(float val) const override {
+        return fabs(val) < 1e-3;
+    }
+};

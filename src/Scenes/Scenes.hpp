@@ -3,11 +3,13 @@
 #include <variant>
 #include "Cord.hpp"
 #include "Cloth.hpp"
+#include "Spheres.hpp"
 #include "RigidBody.hpp"
 
 enum class SceneType {
     CORD,
     CLOTH,
+    SPHERES,
     RIGID,
 };
 
@@ -20,6 +22,9 @@ public:
 
         case SceneType::CLOTH:
             return new Cloth(dynamic_cast<const Cloth &>(*scene));
+
+        case SceneType::SPHERES:
+            return new Spheres(dynamic_cast<const Spheres &>(*scene));
 
         case SceneType::RIGID:
             return new RigidBody(dynamic_cast<const RigidBody &>(*scene));
@@ -38,6 +43,9 @@ public:
         case SceneType::CLOTH:
             return new Cloth();
 
+        case SceneType::SPHERES:
+            return new Spheres();
+
         case SceneType::RIGID:
             return new RigidBody();
 
@@ -47,5 +55,5 @@ public:
         }
     }
 
-    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Rigid Body"};
+    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Rigid Body"};
 };

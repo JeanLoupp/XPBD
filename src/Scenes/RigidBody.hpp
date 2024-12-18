@@ -3,104 +3,71 @@
 #include "../utils.hpp"
 #include "imgui.h"
 
+#include "../TetraMesh.hpp"
+
 #include <ctime>
 
 class RigidBody : public Scene {
 public:
-    int spawnParticles;
-    float pRadius;
+    RigidBody() {
 
-    RigidBody(int totalParticles = 300, float pRadius = 0.1) : spawnParticles(totalParticles), pRadius(pRadius) {
-
-        std::vector<glm::vec3> pos;
         std::vector<Constraint *> constraints;
 
-        sphere = Mesh::createSphere(pRadius);
-        box = Mesh::createBox();
+        sphere = Mesh::createSphere(0.1);
 
-        const std::vector<glm::vec3> &vertexBox = box->getVertices();
+        plane = Mesh::createPlane();
+        plane->applyTransform(utils::getTranslateY(-1.5) * utils::getScale(5));
 
-        planes = {
-            new SemiPlane(vertexBox[0], vertexBox[1], vertexBox[2]),
-            new SemiPlane(vertexBox[4], vertexBox[6], vertexBox[5]),
-            new SemiPlane(vertexBox[8], vertexBox[9], vertexBox[10]),
-            new SemiPlane(vertexBox[12], vertexBox[14], vertexBox[13]),
-            new SemiPlane(vertexBox[16], vertexBox[18], vertexBox[17]),
-            // new SemiPlane(vertexBox[20], vertexBox[21], vertexBox[22]),
-        };
+        const std::vector<glm::vec3> &v = plane->getVertices();
+        semiPlane = new SemiPlane(v[0], v[1], v[2]);
 
-        std::srand(static_cast<unsigned>(std::time(nullptr)));
+        float size = 1;
+        // body = TetraMesh::createCube(size);
+        body = TetraMesh::createBunny();
 
-        const float bound = 1.0f - pRadius;
+        const std::vector<glm::vec3> &pos = body->getPos();
+        const std::vector<unsigned int> &edges = body->getEdges();
+        const std::vector<unsigned int> &tets = body->getTets();
 
-        for (int i = 0; i < totalParticles; i++) {
-            float x = -bound + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 2.0f)) * bound;
-            float y = -bound + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 2.0f)) * bound;
-            float z = -bound + static_cast<float>(std::rand()) / (static_cast<float>(RAND_MAX / 2.0f)) * bound;
-            pos.push_back(glm::vec3(x, y, z));
+        for (int i = 0; i < edges.size(); i += 2) {
+            constraints.push_back(new DistanceConstraint(edges[i], edges[i + 1], glm::length(pos[edges[i]] - pos[edges[i + 1]])));
+        }
 
-            for (SemiPlane *plane : planes) {
-                constraints.push_back(new SemiPlaneConstraint(i, plane, pRadius));
-            }
+        for (int i = 0; i < tets.size(); i += 4) {
+            constraints.push_back(new VolumeConstraint(tets[i], tets[i + 1], tets[i + 2], tets[i + 3], pos));
+        }
 
-            for (int j = 0; j < i; j++) {
-                constraints.push_back(new MinDistanceConstraint(i, j, 2 * pRadius));
-            }
+        for (int i = 0; i < pos.size(); i++) {
+            constraints.push_back(new SemiPlaneConstraint(i, semiPlane, 0));
         }
 
         solver = new Solver(pos, constraints);
     }
 
-    RigidBody(const RigidBody &scene) : RigidBody(scene.spawnParticles, scene.pRadius) {
+    RigidBody(const RigidBody &scene) : RigidBody() {
     }
 
     ~RigidBody() override {
-        for (SemiPlane *plane : planes) {
-            delete plane;
-        }
-        planes.clear();
     }
 
     void draw(ShaderProgram &shaderProgram) override {
-        sphere->startDrawMultiple(shaderProgram);
+        body->udpatePos(solver->getPos());
+        body->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
 
-        for (const glm::vec3 &pos : solver->getPos()) {
-            sphere->addDrawMultiple(shaderProgram, glm::vec3(0.7), utils::getTranslate(pos));
-        }
-
-        sphere->endDrawMultiple();
-
-        box->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
+        plane->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
     }
 
     bool showUI() override {
         bool changed = false;
-
-        int n = spawnParticles;
-        if (ImGui::InputInt("Spawn Particles", &n)) {
-            if (n < 1) {
-                n = 1;
-            }
-            if (n != spawnParticles) {
-                spawnParticles = n;
-                changed = true;
-            }
-        }
-
-        float newRad = pRadius;
-        if (ImGui::DragFloat("Distance", &newRad, 0.01f, 0.0f, FLT_MAX)) {
-            if (newRad != pRadius) {
-                pRadius = newRad;
-                changed = true;
-            }
-        }
 
         return changed;
     }
 
 private:
     std::shared_ptr<Mesh> sphere;
-    std::shared_ptr<Mesh> box;
+    std::shared_ptr<Mesh> plane;
 
-    std::vector<SemiPlane *> planes;
+    SemiPlane *semiPlane;
+
+    std::shared_ptr<TetraMesh> body;
 };
