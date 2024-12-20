@@ -10,6 +10,9 @@ public:
     int spawnParticles;
     float pRadius;
 
+    float alphaPlaneCollision = 1e-8;
+    float alphaCollision = 1e-8;
+
     Spheres(int totalParticles = 300, float pRadius = 0.1) : spawnParticles(totalParticles), pRadius(pRadius) {
 
         std::vector<glm::vec3> pos;
@@ -40,11 +43,11 @@ public:
             pos.push_back(glm::vec3(x, y, z));
 
             for (SemiPlane *plane : planes) {
-                constraints.push_back(new SemiPlaneConstraint(i, plane, pRadius));
+                constraints.push_back(new SemiPlaneConstraint(i, plane, &alphaPlaneCollision, pRadius));
             }
 
             for (int j = 0; j < i; j++) {
-                constraints.push_back(new MinDistanceConstraint(i, j, 2 * pRadius));
+                constraints.push_back(new MinDistanceConstraint(i, j, 2 * pRadius, &alphaCollision));
             }
         }
 
@@ -96,6 +99,11 @@ public:
         }
 
         return changed;
+    }
+
+    void showConstraintUI() override {
+        alphaSelector("Collision", alphaCollision);
+        alphaSelector("Plane collision", alphaPlaneCollision);
     }
 
 private:

@@ -85,6 +85,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
     camera.mouse_button_callback(button, action);
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         double xpos, ypos;
@@ -104,6 +105,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
     camera.scroll_callback(xoffset, yoffset);
 }
 

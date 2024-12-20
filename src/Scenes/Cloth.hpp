@@ -9,6 +9,9 @@ public:
     int w, h;
     float distance;
     bool bendingConstraints;
+    float alphaDistance = 1e-8;
+    float alphaBending = 1e-8;
+    float alphaCollision = 1e-8;
 
     Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = false)
         : w(w), h(h), distance(distance), bendingConstraints(bendingConstraints) {
@@ -28,28 +31,28 @@ public:
 
                 // Distance
                 if (x != w - 1)
-                    constraints.push_back(new DistanceConstraint(y * w + x, y * w + (x + 1), distance));
+                    constraints.push_back(new DistanceConstraint(y * w + x, y * w + (x + 1), distance, &alphaDistance));
                 if (y != h - 1)
-                    constraints.push_back(new DistanceConstraint(y * w + x, (y + 1) * w + x, distance));
+                    constraints.push_back(new DistanceConstraint(y * w + x, (y + 1) * w + x, distance, &alphaDistance));
                 if (x != w - 1 && y != h - 1) {
-                    constraints.push_back(new DistanceConstraint(y * w + x, (y + 1) * w + (x + 1), distance * sqrt(2)));
-                    constraints.push_back(new DistanceConstraint((y + 1) * w + x, y * w + (x + 1), distance * sqrt(2)));
+                    constraints.push_back(new DistanceConstraint(y * w + x, (y + 1) * w + (x + 1), distance * sqrt(2), &alphaDistance));
+                    constraints.push_back(new DistanceConstraint((y + 1) * w + x, y * w + (x + 1), distance * sqrt(2), &alphaDistance));
                 }
 
                 // Collision
-                constraints.push_back(new SemiPlaneConstraint(y * w + x, semiPlane));
+                constraints.push_back(new SemiPlaneConstraint(y * w + x, semiPlane, &alphaCollision));
 
                 // Bending
                 if (bendingConstraints) {
                     if (x != w - 1 && y < h - 2)
-                        constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x + 1, M_PI));
+                        constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x + 1, M_PI, &alphaBending));
                     if (y != h - 1 && x < w - 2)
-                        constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, (y + 1) * w + x + 2, M_PI));
+                        constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, (y + 1) * w + x + 2, M_PI, &alphaBending));
 
                     //     if (y < h - 2)
-                    //         constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2));
+                    //         constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2, &alphaBending));
                     //     if (x < w - 2)
-                    //         constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2));
+                    //         constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2, &alphaBending));
                 }
             }
         }
@@ -109,6 +112,12 @@ public:
             changed = true;
 
         return changed;
+    }
+
+    void showConstraintUI() override {
+        alphaSelector("Distance", alphaDistance);
+        alphaSelector("Bending", alphaBending);
+        alphaSelector("Collision", alphaCollision);
     }
 
 private:

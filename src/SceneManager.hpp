@@ -11,6 +11,9 @@ public:
     void updateScene();
     void drawScene(ShaderProgram &shaderProgram);
     bool showSceneUI() { return scene->showUI(); }
+    void showSceneConstraintUI() { return scene->showConstraintUI(); }
+
+    int *getSolverIterations() { return &scene->solver->N_ITERATION; }
 
     void resetScene();
 

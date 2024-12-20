@@ -46,11 +46,21 @@ void UserInterface::show() {
     ImGuiInputTextFlags flags = (saveVideo && sceneManager->getPlay()) ? ImGuiInputTextFlags_ReadOnly : 0;
     ImGui::InputText("Output name", sceneManager->saveFilename, IM_ARRAYSIZE(sceneManager->saveFilename), flags);
 
+    if (ImGui::CollapsingHeader("Solver parameters")) {
+        ImGui::InputInt("Iterations", sceneManager->getSolverIterations(), 1, 10);
+        if (*sceneManager->getSolverIterations() < 1) {
+            *sceneManager->getSolverIterations() = 1;
+        }
+    }
+
     ImGui::Text("Scene Parameters");
 
     if (sceneManager->showSceneUI()) {
         sceneManager->resetScene();
     }
+
+    if (ImGui::CollapsingHeader("Constraints"))
+        sceneManager->showSceneConstraintUI();
 
     ImGui::End();
 

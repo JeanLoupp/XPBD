@@ -9,6 +9,10 @@
 
 class RigidBody : public Scene {
 public:
+    float alphaDistance = 1e-8;
+    float alphaVolume = 1e-8;
+    float alphaCollision = 1e-8;
+
     RigidBody() {
 
         std::vector<Constraint *> constraints;
@@ -30,15 +34,15 @@ public:
         const std::vector<unsigned int> &tets = body->getTets();
 
         for (int i = 0; i < edges.size(); i += 2) {
-            constraints.push_back(new DistanceConstraint(edges[i], edges[i + 1], glm::length(pos[edges[i]] - pos[edges[i + 1]])));
+            constraints.push_back(new DistanceConstraint(edges[i], edges[i + 1], glm::length(pos[edges[i]] - pos[edges[i + 1]]), &alphaDistance));
         }
 
         for (int i = 0; i < tets.size(); i += 4) {
-            constraints.push_back(new VolumeConstraint(tets[i], tets[i + 1], tets[i + 2], tets[i + 3], pos));
+            constraints.push_back(new VolumeConstraint(tets[i], tets[i + 1], tets[i + 2], tets[i + 3], pos, &alphaVolume));
         }
 
         for (int i = 0; i < pos.size(); i++) {
-            constraints.push_back(new SemiPlaneConstraint(i, semiPlane, 0));
+            constraints.push_back(new SemiPlaneConstraint(i, semiPlane, &alphaCollision, 0));
         }
 
         solver = new Solver(pos, constraints);
@@ -61,6 +65,12 @@ public:
         bool changed = false;
 
         return changed;
+    }
+
+    void showConstraintUI() override {
+        alphaSelector("Distance", alphaDistance);
+        alphaSelector("Volule", alphaVolume);
+        alphaSelector("Collision", alphaCollision);
     }
 
 private:

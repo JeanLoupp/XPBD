@@ -8,6 +8,7 @@ public:
     // Parameters
     int nParticles;
     float distance;
+    float alphaDistance = 1e-8;
 
     Cord(int nParticles = 10, float distance = 0.5f) : nParticles(nParticles), distance(distance) {
 
@@ -18,7 +19,7 @@ public:
             pos.push_back(glm::vec3(distance * i, 0, 0));
 
             if (i != nParticles - 1)
-                constraints.push_back(new DistanceConstraint(i, i + 1, distance));
+                constraints.push_back(new DistanceConstraint(i, i + 1, distance, &alphaDistance));
         }
 
         solver = new Solver(pos, constraints);
@@ -60,6 +61,10 @@ public:
         }
 
         return changed;
+    }
+
+    void showConstraintUI() override {
+        alphaSelector("Distance", alphaDistance);
     }
 
 private:

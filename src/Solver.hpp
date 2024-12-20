@@ -3,6 +3,8 @@
 
 class Solver {
 public:
+    int N_ITERATION = 100;
+
     Solver(const std::vector<glm::vec3> &pos, const std::vector<Constraint *> &constraints);
     ~Solver();
 
@@ -22,7 +24,4 @@ private:
     std::vector<glm::vec3> v;
     std::vector<Constraint *> C;
     std::vector<float> w; // inverse of mass
-    float Minv;
-
-    int N_ITERATION = 100;
 };

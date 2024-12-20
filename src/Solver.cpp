@@ -37,7 +37,6 @@ void Solver::update(const float dt) {
     std::vector<float> lambda(nConstraints, 0);
 
     const glm::vec3 g(0, -9.81, 0);
-    const float alpha = 1e-8 / (dt * dt);
 
     for (int i = 0; i < nParticles; i++) {
         if (w[i] != 0)
@@ -53,6 +52,8 @@ void Solver::update(const float dt) {
 
             std::vector<glm::vec3> grad = C[j]->evalGrad(nextX);
             float normGrad = C[j]->evalNorm2Grad(nextX, w);
+
+            const float alpha = *(C[j]->alpha) / (dt * dt);
 
             float dlambda = (-C_val - alpha * lambda[j]) / (normGrad + alpha);
 

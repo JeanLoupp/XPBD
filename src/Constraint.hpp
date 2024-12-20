@@ -7,6 +7,7 @@
 
 struct Constraint {
     std::vector<int> particles;
+    const float *alpha;
     virtual float eval(const std::vector<glm::vec3> &pos) const = 0;
     virtual std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const = 0;
     virtual float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const = 0;
@@ -19,8 +20,9 @@ struct Constraint {
 struct DistanceConstraint : public Constraint {
     float l0;
 
-    DistanceConstraint(int i, int j, float l0) : l0(l0) {
+    DistanceConstraint(int i, int j, float l0, const float *alpha) : l0(l0) {
         particles = {i, j};
+        this->alpha = alpha;
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
@@ -42,8 +44,9 @@ struct DistanceConstraint : public Constraint {
 struct PositionConstraint : public Constraint {
     glm::vec3 x0;
 
-    PositionConstraint(int i, const glm::vec3 &x0) : x0(x0) {
+    PositionConstraint(int i, const glm::vec3 &x0, const float *alpha) : x0(x0) {
         particles = {i};
+        this->alpha = alpha;
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
@@ -76,8 +79,9 @@ struct SemiPlaneConstraint : public Constraint {
     SemiPlane *plane;
     float dist;
 
-    SemiPlaneConstraint(int i, SemiPlane *plane, float dist = 0.05f) : plane(plane), dist(dist) {
+    SemiPlaneConstraint(int i, SemiPlane *plane, const float *alpha, float dist = 0.05f) : plane(plane), dist(dist) {
         particles = {i};
+        this->alpha = alpha;
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
@@ -105,8 +109,9 @@ struct BendingConstraint : public Constraint {
     // mutable float d;
     mutable glm::vec3 q1, q2, q3, q4;
 
-    BendingConstraint(int p1, int p2, int p3, int p4, float angle) : angle(angle) {
+    BendingConstraint(int p1, int p2, int p3, int p4, float angle, const float *alpha) : angle(angle) {
         particles = {p1, p2, p3, p4};
+        this->alpha = alpha;
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
@@ -168,8 +173,9 @@ struct BendingConstraint : public Constraint {
 struct MinDistanceConstraint : public Constraint {
     float l0;
 
-    MinDistanceConstraint(int i, int j, float l0) : l0(l0) {
+    MinDistanceConstraint(int i, int j, float l0, const float *alpha) : l0(l0) {
         particles = {i, j};
+        this->alpha = alpha;
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
@@ -197,10 +203,11 @@ struct VolumeConstraint : public Constraint {
     // Cache
     mutable std::vector<glm::vec3> gradients;
 
-    VolumeConstraint(int p1, int p2, int p3, int p4, const std::vector<glm::vec3> &pos) {
+    VolumeConstraint(int p1, int p2, int p3, int p4, const std::vector<glm::vec3> &pos, const float *alpha) {
         particles = {p1, p2, p3, p4};
         gradients.resize(4, glm::vec3(0));
         initialVolume = calculateInitialVolume(pos);
+        this->alpha = alpha;
     }
 
     float calculateInitialVolume(const std::vector<glm::vec3> &pos) const {
