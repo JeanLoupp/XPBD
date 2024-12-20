@@ -2,6 +2,7 @@
 
 void SceneManager::resetScene() {
     Scene *newScene = Scenes::createScene(sceneType, scene);
+    newScene->solver->N_ITERATION = scene->solver->N_ITERATION;
     delete scene;
     scene = newScene;
     dt = timer.elapsed();
@@ -22,8 +23,8 @@ void SceneManager::setSceneType(SceneType sceneType) {
     dt = timer.elapsed();
 }
 
-void SceneManager::drawScene(ShaderProgram &shaderProgram) {
-    scene->draw(shaderProgram);
+void SceneManager::drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) {
+    scene->draw(shaderProgram, checkerShaderProgram);
 }
 
 void SceneManager::grab(const glm::vec3 &direction, const glm::vec3 &camPos) {

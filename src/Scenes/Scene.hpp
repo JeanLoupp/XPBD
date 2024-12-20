@@ -13,7 +13,7 @@ public:
 public:
     virtual ~Scene() { delete solver; }
 
-    virtual void draw(ShaderProgram &shaderProgram) = 0;
+    virtual void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) = 0;
     virtual bool showUI() { return false; }
     virtual void showConstraintUI() {}
 

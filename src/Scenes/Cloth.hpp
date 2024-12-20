@@ -20,7 +20,7 @@ public:
         std::vector<Constraint *> constraints;
 
         plane = Mesh::createPlane();
-        plane->applyTransform(utils::getTranslateY(-1.5) * utils::getScale(5));
+        plane->applyTransform(utils::getTranslateY(-1.5) * utils::getScale(500));
 
         const std::vector<glm::vec3> &v = plane->getVertices();
         semiPlane = new SemiPlane(v[0], v[1], v[2]);
@@ -67,12 +67,14 @@ public:
 
     Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {}
 
-    void draw(ShaderProgram &shaderProgram) override {
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
+        shaderProgram.use();
         mesh->setVertices(solver->getPos());
         mesh->updateNormals();
         mesh->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
 
-        plane->draw(shaderProgram, glm::vec3(0.6), glm::mat4(1.0));
+        checkerShaderProgram.use();
+        plane->draw(checkerShaderProgram, glm::vec3(0.6), glm::mat4(1.0));
     }
 
     bool showUI() override {

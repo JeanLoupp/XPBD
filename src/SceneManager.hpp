@@ -9,7 +9,7 @@ public:
     ~SceneManager() { delete scene; }
 
     void updateScene();
-    void drawScene(ShaderProgram &shaderProgram);
+    void drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram);
     bool showSceneUI() { return scene->showUI(); }
     void showSceneConstraintUI() { return scene->showConstraintUI(); }
 

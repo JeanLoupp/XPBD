@@ -196,6 +196,7 @@ int main() {
     if (!init()) return -1;
 
     ShaderProgram shaderProgram("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+    ShaderProgram checkerShaderProgram("shaders/vertex_shader.glsl", "shaders/checker_frag.glsl");
 
     sceneManager.setSceneType(SceneType::CORD);
 
@@ -208,9 +209,10 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         beginRender(shaderProgram);
+        beginRender(checkerShaderProgram);
 
         sceneManager.updateScene();
-        sceneManager.drawScene(shaderProgram);
+        sceneManager.drawScene(shaderProgram, checkerShaderProgram);
 
         userInterface.show();
 

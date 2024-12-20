@@ -28,7 +28,8 @@ public:
 
     Cord(const Cord &scene) : Cord(scene.nParticles, scene.distance) {}
 
-    void draw(ShaderProgram &shaderProgram) override {
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
+        shaderProgram.use();
         circle->startDrawMultiple(shaderProgram);
 
         for (const glm::vec3 &pos : solver->getPos()) {

@@ -3,7 +3,7 @@
 
 class Solver {
 public:
-    int N_ITERATION = 100;
+    int N_ITERATION = 20;
 
     Solver(const std::vector<glm::vec3> &pos, const std::vector<Constraint *> &constraints);
     ~Solver();

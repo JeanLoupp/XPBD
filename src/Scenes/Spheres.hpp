@@ -64,7 +64,8 @@ public:
         planes.clear();
     }
 
-    void draw(ShaderProgram &shaderProgram) override {
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
+        shaderProgram.use();
         sphere->startDrawMultiple(shaderProgram);
 
         for (const glm::vec3 &pos : solver->getPos()) {
