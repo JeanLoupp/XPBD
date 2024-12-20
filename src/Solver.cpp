@@ -31,6 +31,8 @@ void Solver::setPos(int index, const glm::vec3 &p) {
     x[index] = p;
 }
 
+// #define SUBSTEPS
+#ifndef SUBSTEPS
 void Solver::update(const float dt) {
 
     std::vector<glm::vec3> nextX(x.size());
@@ -38,6 +40,7 @@ void Solver::update(const float dt) {
 
     const glm::vec3 g(0, -9.81, 0);
 
+    // Predict
     for (int i = 0; i < nParticles; i++) {
         if (w[i] != 0)
             nextX[i] = x[i] + dt * v[i] + dt * dt * g;
@@ -45,7 +48,8 @@ void Solver::update(const float dt) {
             nextX[i] = x[i];
     }
 
-    for (int i = 0; i < N_ITERATION; i++) {
+    for (int n = 0; n < N_ITERATION; n++) {
+        // Solve constraints
         for (int j = 0; j < nConstraints; j++) {
             float C_val = C[j]->eval(nextX);
             if (C[j]->isSatisfied(C_val)) continue; // constraint already satisfied
@@ -66,8 +70,55 @@ void Solver::update(const float dt) {
         }
     }
 
+    // Update
     for (int i = 0; i < nParticles; i++) {
         v[i] = (nextX[i] - x[i]) / dt;
         x[i] = nextX[i];
     }
 }
+
+#else
+// Substeps
+void Solver::update(const float dt_) {
+
+    std::vector<glm::vec3> nextX(x.size());
+
+    const float dt = dt_ / N_ITERATION;
+
+    const glm::vec3 g(0, -9.81, 0);
+
+    for (int n = 0; n < N_ITERATION; n++) {
+        // Predict
+        for (int i = 0; i < nParticles; i++) {
+            if (w[i] != 0)
+                nextX[i] = x[i] + dt * v[i] + dt * dt * g;
+            else
+                nextX[i] = x[i];
+        }
+
+        // Solve constraints
+        for (int j = 0; j < nConstraints; j++) {
+            float C_val = C[j]->eval(nextX);
+            if (C[j]->isSatisfied(C_val)) continue; // constraint already satisfied
+
+            std::vector<glm::vec3> grad = C[j]->evalGrad(nextX);
+            float normGrad = C[j]->evalNorm2Grad(nextX, w);
+
+            const float alpha = *(C[j]->alpha) / (dt_ * dt_);
+
+            float dlambda = -C_val / (normGrad + alpha);
+
+            for (int i = 0; i < grad.size(); i++) {
+                int index = C[j]->particles[i];
+                nextX[index] += dlambda * w[index] * grad[i];
+            }
+        }
+
+        // Update
+        for (int i = 0; i < nParticles; i++) {
+            v[i] = (nextX[i] - x[i]) / dt;
+            x[i] = nextX[i];
+        }
+    }
+}
+#endif
