@@ -64,7 +64,7 @@ public:
         planes.clear();
     }
 
-    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         shaderProgram.use();
         sphere->startDrawMultiple(shaderProgram);
 

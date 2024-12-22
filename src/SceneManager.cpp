@@ -23,8 +23,8 @@ void SceneManager::setSceneType(SceneType sceneType) {
     dt = timer.elapsed();
 }
 
-void SceneManager::drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) {
-    scene->draw(shaderProgram, checkerShaderProgram);
+void SceneManager::drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) {
+    scene->draw(shaderProgram, checkerShaderProgram, shadowMap);
 }
 
 void SceneManager::grab(const glm::vec3 &direction, const glm::vec3 &camPos) {

@@ -73,7 +73,7 @@ void Camera::setViewport(int screenWidth, int screenHeight) {
     this->screenWidth = screenWidth;
     this->screenHeight = screenHeight;
 
-    projMat = glm::perspective(glm::radians(fov), (float)screenWidth / screenHeight, 0.1f, 100.0f);
+    projMat = glm::perspective(glm::radians(fov), (float)screenWidth / screenHeight, near, far);
 }
 
 void Camera::updateView() {

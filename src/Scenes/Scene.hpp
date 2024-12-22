@@ -4,6 +4,7 @@
 #include "../ShaderProgram.hpp"
 #include "../Solver.hpp"
 #include "../Mesh.hpp"
+#include "../ShadowMap.hpp"
 #include "imgui.h"
 
 class Scene {
@@ -13,7 +14,7 @@ public:
 public:
     virtual ~Scene() { delete solver; }
 
-    virtual void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) = 0;
+    virtual void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) = 0;
     virtual bool showUI() { return false; }
     virtual void showConstraintUI() {}
 

@@ -32,5 +32,6 @@ glm::mat4 getRotate(float angleX, float angleY, float angleZ);
 } // namespace utils
 
 std::ostream &operator<<(std::ostream &os, const glm::vec3 &vec);
+std::ostream &operator<<(std::ostream &os, const glm::mat4 &mat);
 
 #endif // UTILS_HPP

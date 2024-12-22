@@ -10,6 +10,9 @@
 #include <memory>
 #include <filesystem>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 #include "ShaderProgram.hpp"
 #include "ComputeShader.hpp"
 #include "Camera.hpp"
@@ -20,9 +23,7 @@
 #include "Scenes/Scenes.hpp"
 #include "Timer.hpp"
 #include "UserInterface.hpp"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "ShadowMap.hpp"
 
 // Constants and global variables
 unsigned int SCR_WIDTH = 800;
@@ -34,7 +35,7 @@ bool wireframeMode = false;
 
 SceneManager sceneManager;
 
-glm::vec3 lightPos(5.0f, 0.0f, 5.0f);
+glm::vec3 lightDir = glm::normalize(glm::vec3(-0.5f, -0.5f, -0.5f));
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
 int frameCount = 0;
@@ -168,7 +169,6 @@ bool initOpenGL() {
 
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
     return true;
 }
 
@@ -188,7 +188,7 @@ void beginRender(ShaderProgram &shaderProgram) {
     shaderProgram.set("viewPos", camera.getPos());
 
     // Light
-    shaderProgram.set("lightPos", lightPos);
+    shaderProgram.set("lightDir", lightDir);
     shaderProgram.set("lightColor", lightColor);
 }
 
@@ -197,6 +197,7 @@ int main() {
 
     ShaderProgram shaderProgram("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     ShaderProgram checkerShaderProgram("shaders/vertex_shader.glsl", "shaders/checker_frag.glsl");
+    ShadowMap shadowMap("shaders/vertexShaderShadowMap.glsl", "shaders/fragmentShaderShadowMap.glsl", lightDir, camera, 1024, 1024);
 
     sceneManager.setSceneType(SceneType::CORD);
 
@@ -212,7 +213,7 @@ int main() {
         beginRender(checkerShaderProgram);
 
         sceneManager.updateScene();
-        sceneManager.drawScene(shaderProgram, checkerShaderProgram);
+        sceneManager.drawScene(shaderProgram, checkerShaderProgram, shadowMap);
 
         userInterface.show();
 

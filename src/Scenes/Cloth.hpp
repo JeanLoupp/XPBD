@@ -67,13 +67,19 @@ public:
 
     Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {}
 
-    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
-        shaderProgram.use();
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         mesh->setVertices(solver->getPos());
         mesh->updateNormals();
+
+        shadowMap.beginRender();
+        shadowMap.addObject(mesh);
+        shadowMap.endRender();
+
+        shaderProgram.use();
         mesh->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
 
         checkerShaderProgram.use();
+        shadowMap.sendShadowMap(checkerShaderProgram);
         plane->draw(checkerShaderProgram, glm::vec3(0.6), glm::mat4(1.0));
     }
 

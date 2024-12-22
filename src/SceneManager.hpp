@@ -3,13 +3,14 @@
 #include "ShaderProgram.hpp"
 #include "Scenes/Scenes.hpp"
 #include "Timer.hpp"
+#include "ShadowMap.hpp"
 
 class SceneManager {
 public:
     ~SceneManager() { delete scene; }
 
     void updateScene();
-    void drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram);
+    void drawScene(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap);
     bool showSceneUI() { return scene->showUI(); }
     void showSceneConstraintUI() { return scene->showConstraintUI(); }
 

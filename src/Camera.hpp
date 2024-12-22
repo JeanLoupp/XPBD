@@ -23,6 +23,10 @@ public:
     const glm::mat4 &getProjMat() const { return projMat; }
     const glm::vec3 &getPos() const { return cameraPos; }
 
+    float getAspectRatio() const { return (float)screenWidth / screenHeight; }
+    float getNear() const { return near; }
+    float getFar() const { return far; }
+
     glm::vec3 getRay(double x, double y);
 
     bool hasMoved();
@@ -39,6 +43,9 @@ private:
     bool firstMouse = true;
     bool mouseButtonPressed = false;
     bool m_hasMoved = true;
+
+    float near = 0.1f;
+    float far = 100.0f;
 
     int screenWidth, screenHeight;
     glm::mat4 projMat;

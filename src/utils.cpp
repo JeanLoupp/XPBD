@@ -100,3 +100,14 @@ std::ostream &operator<<(std::ostream &os, const glm::vec3 &vec) {
     os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return os;
 }
+
+std::ostream &operator<<(std::ostream &os, const glm::mat4 &mat) {
+    for (int row = 0; row < 4; ++row) {
+        os << "| ";
+        for (int col = 0; col < 4; ++col) {
+            os << mat[row][col] << " ";
+        }
+        os << "|\n";
+    }
+    return os;
+}

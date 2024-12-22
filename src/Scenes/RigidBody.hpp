@@ -54,12 +54,17 @@ public:
     ~RigidBody() override {
     }
 
-    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram) override {
+    void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
+        shadowMap.beginRender();
+        shadowMap.addObject(body);
+        shadowMap.endRender();
+
         shaderProgram.use();
         body->udpatePos(solver->getPos());
         body->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
 
         checkerShaderProgram.use();
+        shadowMap.sendShadowMap(checkerShaderProgram);
         plane->draw(checkerShaderProgram, glm::vec3(0.7), glm::mat4(1.0));
     }
 
