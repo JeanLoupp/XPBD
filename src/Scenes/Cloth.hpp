@@ -63,9 +63,13 @@ public:
 
         solver->addFixedPoint(0, pos[0]);
         solver->addFixedPoint(w - 1, pos[w - 1]);
+
+        glDisable(GL_CULL_FACE);
     }
 
     Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {}
+
+    ~Cloth() override { glEnable(GL_CULL_FACE); }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         mesh->setVertices(solver->getPos());

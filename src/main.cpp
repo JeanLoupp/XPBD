@@ -169,6 +169,7 @@ bool initOpenGL() {
 
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     return true;
 }
 
