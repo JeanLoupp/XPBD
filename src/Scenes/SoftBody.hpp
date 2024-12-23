@@ -7,13 +7,13 @@
 
 #include <ctime>
 
-class RigidBody : public Scene {
+class SoftBody : public Scene {
 public:
     float alphaDistance = 1e-8;
     float alphaVolume = 1e-8;
     float alphaCollision = 1e-8;
 
-    RigidBody() {
+    SoftBody() {
 
         std::vector<Constraint *> constraints;
 
@@ -48,10 +48,10 @@ public:
         solver = new Solver(pos, constraints);
     }
 
-    RigidBody(const RigidBody &scene) : RigidBody() {
+    SoftBody(const SoftBody &scene) : SoftBody() {
     }
 
-    ~RigidBody() override {
+    ~SoftBody() override {
     }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
