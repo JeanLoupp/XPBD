@@ -18,8 +18,8 @@ public:
     void removeFixedPoint(int index);
 
 private:
-    unsigned int nParticles;
-    unsigned int nConstraints;
+    uint nParticles;
+    uint nConstraints;
     std::vector<glm::vec3> x;
     std::vector<glm::vec3> v;
     std::vector<Constraint *> C;

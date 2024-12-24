@@ -4,8 +4,8 @@ ShaderProgram::ShaderProgram(const std::string &vertexPath, const std::string &f
     std::string vertexCode = loadShaderSource(vertexPath);
     std::string fragmentCode = loadShaderSource(fragmentPath);
 
-    unsigned int vertexShader = compileShader(vertexCode, GL_VERTEX_SHADER);
-    unsigned int fragmentShader = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+    uint vertexShader = compileShader(vertexCode, GL_VERTEX_SHADER);
+    uint fragmentShader = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
 
     programID = glCreateProgram();
     glAttachShader(programID, vertexShader);
@@ -36,8 +36,8 @@ std::string ShaderProgram::loadShaderSource(const std::string &filePath) {
     return buffer.str();
 }
 
-unsigned int ShaderProgram::compileShader(const std::string &source, GLenum type) {
-    unsigned int shader = glCreateShader(type);
+uint ShaderProgram::compileShader(const std::string &source, GLenum type) {
+    uint shader = glCreateShader(type);
     const char *src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
@@ -54,22 +54,22 @@ unsigned int ShaderProgram::compileShader(const std::string &source, GLenum type
     return shader;
 }
 
-void ShaderProgram::setArray(const std::string &array, unsigned int index, const std::string &name, int i) {
+void ShaderProgram::setArray(const std::string &array, uint index, const std::string &name, int i) {
     std::string fullName = array + "[" + std::to_string(index) + "]." + name;
     glUniform1i(glGetUniformLocation(programID, fullName.c_str()), i);
 }
 
-void ShaderProgram::setArray(const std::string &array, unsigned int index, const std::string &name, float val) {
+void ShaderProgram::setArray(const std::string &array, uint index, const std::string &name, float val) {
     std::string fullName = array + "[" + std::to_string(index) + "]." + name;
     glUniform1f(glGetUniformLocation(programID, fullName.c_str()), val);
 }
 
-void ShaderProgram::setArray(const std::string &array, unsigned int index, const std::string &name, const glm::vec3 &vec) {
+void ShaderProgram::setArray(const std::string &array, uint index, const std::string &name, const glm::vec3 &vec) {
     std::string fullName = array + "[" + std::to_string(index) + "]." + name;
     glUniform3fv(glGetUniformLocation(programID, fullName.c_str()), 1, glm::value_ptr(vec));
 }
 
-void ShaderProgram::setArray(const std::string &array, unsigned int index, const std::string &name, const glm::mat4 &mat) {
+void ShaderProgram::setArray(const std::string &array, uint index, const std::string &name, const glm::mat4 &mat) {
     std::string fullName = array + "[" + std::to_string(index) + "]." + name;
     glUniformMatrix4fv(glGetUniformLocation(programID, fullName.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }

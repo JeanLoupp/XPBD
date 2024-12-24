@@ -30,8 +30,8 @@ public:
         body = TetraMesh::createBunny();
 
         const std::vector<glm::vec3> &pos = body->getPos();
-        const std::vector<unsigned int> &edges = body->getEdges();
-        const std::vector<unsigned int> &tets = body->getTets();
+        const std::vector<uint> &edges = body->getEdges();
+        const std::vector<uint> &tets = body->getTets();
 
         for (int i = 0; i < edges.size(); i += 2) {
             constraints.push_back(new DistanceConstraint(edges[i], edges[i + 1], glm::length(pos[edges[i]] - pos[edges[i + 1]]), &alphaDistance));

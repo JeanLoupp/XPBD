@@ -5,16 +5,16 @@
 class TetraMesh : public Mesh {
 public:
     TetraMesh(const std::vector<glm::vec3> &pos,
-              const std::vector<unsigned int> &meshToPos,
-              const std::vector<unsigned int> &edges,
-              const std::vector<unsigned int> &tets,
-              const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices)
+              const std::vector<uint> &meshToPos,
+              const std::vector<uint> &edges,
+              const std::vector<uint> &tets,
+              const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<uint> &indices)
         : pos(pos), meshToPos(meshToPos), edges(edges), tets(tets), Mesh(vertices, normals, indices) {}
 
     const std::vector<glm::vec3> &getPos() { return pos; }
-    const std::vector<unsigned int> &getMeshToPos() const { return meshToPos; }
-    const std::vector<unsigned int> &getEdges() const { return edges; }
-    const std::vector<unsigned int> &getTets() const { return tets; }
+    const std::vector<uint> &getMeshToPos() const { return meshToPos; }
+    const std::vector<uint> &getEdges() const { return edges; }
+    const std::vector<uint> &getTets() const { return tets; }
 
     void udpatePos(const std::vector<glm::vec3> &pos);
 
@@ -23,7 +23,7 @@ public:
 
 private:
     std::vector<glm::vec3> pos;
-    std::vector<unsigned int> meshToPos;
-    std::vector<unsigned int> edges;
-    std::vector<unsigned int> tets;
+    std::vector<uint> meshToPos;
+    std::vector<uint> edges;
+    std::vector<uint> tets;
 };

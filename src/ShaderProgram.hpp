@@ -25,13 +25,13 @@ public:
     void set(const GLchar *name, const glm::vec3 &vec) { glUniform3fv(glGetUniformLocation(programID, name), 1, glm::value_ptr(vec)); };
     void set(const GLchar *name, const glm::mat4 &mat) { glUniformMatrix4fv(glGetUniformLocation(programID, name), 1, GL_FALSE, glm::value_ptr(mat)); };
 
-    void setArray(const std::string &array, unsigned int index, const std::string &name, int i);
-    void setArray(const std::string &array, unsigned int index, const std::string &name, float i);
-    void setArray(const std::string &array, unsigned int index, const std::string &name, const glm::vec3 &vec);
-    void setArray(const std::string &array, unsigned int index, const std::string &name, const glm::mat4 &mat);
+    void setArray(const std::string &array, uint index, const std::string &name, int i);
+    void setArray(const std::string &array, uint index, const std::string &name, float i);
+    void setArray(const std::string &array, uint index, const std::string &name, const glm::vec3 &vec);
+    void setArray(const std::string &array, uint index, const std::string &name, const glm::mat4 &mat);
 
     static std::string loadShaderSource(const std::string &filePath);
-    static unsigned int compileShader(const std::string &source, GLenum type);
+    static uint compileShader(const std::string &source, GLenum type);
 
 protected:
     GLuint programID;

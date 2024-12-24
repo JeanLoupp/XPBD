@@ -22,7 +22,7 @@ public:
     Material(glm::vec3 color, glm::vec3 emiColor, float emissionStrength, float smoothness, float reflexivity, Transformation tranfo)
         : color(color), emissionColor(emiColor), emissionStrength(emissionStrength), smoothness(smoothness), reflexivity(reflexivity), pos(tranfo.position), rotation(tranfo.rotation), size(tranfo.scale) { genModel(); };
 
-    void draw(unsigned int shaderProgram) { mesh->draw(shaderProgram, color, modelMat); };
+    void draw(uint shaderProgram) { mesh->draw(shaderProgram, color, modelMat); };
 
     void genModel() { modelMat = utils::getTransfoMat(pos, size, rotation); }
 

@@ -9,7 +9,7 @@
 #define PI 3.14159265359
 
 // Constructeur de la classe Mesh
-Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices, const std::string &name)
+Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<uint> &indices, const std::string &name)
     : vertices(vertices), normals(normals), indices(indices), indexCount(indices.size()), name(name) {
 
     hasTextures = false;
@@ -32,12 +32,12 @@ Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> 
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<unsigned int> &indices, const std::string &name)
+Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<uint> &indices, const std::string &name)
     : vertices(vertices), normals(normals), indices(indices), indexCount(indices.size()), name(name) {
 
     hasTextures = (textures.size() != 0);
@@ -71,19 +71,19 @@ Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> 
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 }
 
 // Fonction pour dessiner le maillage
-void Mesh::draw(unsigned int shaderProgram, const glm::vec3 &color, const glm::mat4 &modelMat) {
+void Mesh::draw(uint shaderProgram, const glm::vec3 &color, const glm::mat4 &modelMat) {
     glUseProgram(shaderProgram);
 
     int colorLoc = glGetUniformLocation(shaderProgram, "objectColor");
     glUniform3fv(colorLoc, 1, glm::value_ptr(color));
 
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    uint modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
 
     glBindVertexArray(VAO);
@@ -121,9 +121,9 @@ void Mesh::updateNormals() {
     normals.resize(vertices.size(), glm::vec3(0.0f));
 
     for (size_t i = 0; i < indices.size(); i += 3) {
-        unsigned int i0 = indices[i];
-        unsigned int i1 = indices[i + 1];
-        unsigned int i2 = indices[i + 2];
+        uint i0 = indices[i];
+        uint i1 = indices[i + 1];
+        uint i2 = indices[i + 2];
 
         const glm::vec3 &v0 = vertices[i0];
         const glm::vec3 &v1 = vertices[i1];
@@ -235,7 +235,7 @@ std::shared_ptr<Mesh> Mesh::createCube(float w) {
         {0.0f, 1.0f, 0.0f} // Haut
     };
 
-    std::vector<unsigned int> indices = {
+    std::vector<uint> indices = {
         // Face arrière
         0, 2, 1, 3, 2, 0,
         // Face avant
@@ -258,7 +258,7 @@ std::shared_ptr<Mesh> Mesh::createSphere(float radius, int resolution) {
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
-    std::vector<unsigned int> indices;
+    std::vector<uint> indices;
 
     glm::vec3 pos;
     float phi, theta;
@@ -318,7 +318,7 @@ std::shared_ptr<Mesh> Mesh::createPlane() {
         {0, 1.0f, 0},
     };
 
-    std::vector<unsigned int> indices = {0, 1, 2, 3, 2, 1};
+    std::vector<uint> indices = {0, 1, 2, 3, 2, 1};
 
     return std::make_shared<Mesh>(vertices, normals, indices, "Plane");
 }
@@ -328,7 +328,7 @@ std::shared_ptr<Mesh> Mesh::createPlane(const std::vector<glm::vec3> &pos, int w
 
     std::vector<glm::vec3> normals(pos.size(), glm::vec3(0));
 
-    std::vector<unsigned int> indices;
+    std::vector<uint> indices;
 
     for (int i = 0; i < w - 1; i++) {
         for (int j = 0; j < h - 1; j++) {
@@ -365,7 +365,7 @@ std::shared_ptr<Mesh> Mesh::createQuad() {
         {0.0f, 0.0f},
     };
 
-    std::vector<unsigned int> indices = {0, 2, 1, 0, 3, 2};
+    std::vector<uint> indices = {0, 2, 1, 0, 3, 2};
 
     return std::make_shared<Mesh>(vertices, normals, textures, indices, "Quad");
 }
@@ -433,7 +433,7 @@ std::shared_ptr<Mesh> Mesh::createBox() {
         {0.0f, -1.0f, 0.0f} // Haut
     };
 
-    std::vector<unsigned int> indices = {
+    std::vector<uint> indices = {
         // Face arrière
         1, 2, 0, 3, 0, 2,
         // Face avant
@@ -456,7 +456,7 @@ std::shared_ptr<Mesh> Mesh::createTore(int resolution) {
 
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
-    std::vector<unsigned int> indices;
+    std::vector<uint> indices;
 
     glm::vec3 pos;
     float phi, theta;
@@ -521,7 +521,7 @@ std::shared_ptr<Mesh> Mesh::createFromOFF(const std::string &filePath) {
     headerStream >> numVertices >> numFaces >> numEdges;
 
     std::vector<glm::vec3> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<uint> indices;
 
     // Read vertices
     for (size_t i = 0; i < numVertices; ++i) {
@@ -541,7 +541,7 @@ std::shared_ptr<Mesh> Mesh::createFromOFF(const std::string &filePath) {
         if (faceSize != 3) {
             throw std::runtime_error("Only triangular faces are supported.");
         }
-        unsigned int v1, v2, v3;
+        uint v1, v2, v3;
         faceStream >> v1 >> v2 >> v3;
         indices.push_back(v1);
         indices.push_back(v2);
