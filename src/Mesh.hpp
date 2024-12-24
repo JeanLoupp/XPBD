@@ -10,8 +10,8 @@
 
 class Mesh {
 public:
-    Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices, std::string name = "");
-    Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<unsigned int> &indices, std::string name = "");
+    Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices, const std::string &name = "");
+    Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<unsigned int> &indices, const std::string &name = "");
     ~Mesh();
 
     void draw(unsigned int shaderProgram, const glm::vec3 &color, const glm::mat4 &modelMat);
@@ -33,6 +33,7 @@ public:
     static std::shared_ptr<Mesh> createBox();
     static std::shared_ptr<Mesh> createQuad();
     static std::shared_ptr<Mesh> createTore(int resolution = 16);
+    static std::shared_ptr<Mesh> createFromOFF(const std::string &filePath);
 
     const unsigned int getVAO() const { return VAO; }
     const unsigned int getIndexCount() const { return indexCount; }

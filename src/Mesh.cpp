@@ -9,7 +9,7 @@
 #define PI 3.14159265359
 
 // Constructeur de la classe Mesh
-Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices, std::string name)
+Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<unsigned int> &indices, const std::string &name)
     : vertices(vertices), normals(normals), indices(indices), indexCount(indices.size()), name(name) {
 
     hasTextures = false;
@@ -37,7 +37,7 @@ Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> 
     glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<unsigned int> &indices, std::string name)
+Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &textures, const std::vector<unsigned int> &indices, const std::string &name)
     : vertices(vertices), normals(normals), indices(indices), indexCount(indices.size()), name(name) {
 
     hasTextures = (textures.size() != 0);
@@ -499,4 +499,61 @@ std::shared_ptr<Mesh> Mesh::createTore(int resolution) {
     }
 
     return std::make_shared<Mesh>(vertices, normals, indices, "Tore");
+}
+
+std::shared_ptr<Mesh> Mesh::createFromOFF(const std::string &filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + filePath);
+    }
+
+    std::string line;
+    // Read the header
+    std::getline(file, line);
+    if (line != "OFF") {
+        throw std::runtime_error("File is not in OFF format.");
+    }
+
+    // Read the number of vertices, faces, and edges
+    size_t numVertices = 0, numFaces = 0, numEdges = 0;
+    std::getline(file, line);
+    std::istringstream headerStream(line);
+    headerStream >> numVertices >> numFaces >> numEdges;
+
+    std::vector<glm::vec3> vertices;
+    std::vector<unsigned int> indices;
+
+    // Read vertices
+    for (size_t i = 0; i < numVertices; ++i) {
+        float x, y, z;
+        std::getline(file, line);
+        std::istringstream vertexStream(line);
+        vertexStream >> x >> y >> z;
+        vertices.emplace_back(x, y, z);
+    }
+
+    // Read faces
+    for (size_t i = 0; i < numFaces; ++i) {
+        std::getline(file, line);
+        std::istringstream faceStream(line);
+        size_t faceSize;
+        faceStream >> faceSize;
+        if (faceSize != 3) {
+            throw std::runtime_error("Only triangular faces are supported.");
+        }
+        unsigned int v1, v2, v3;
+        faceStream >> v1 >> v2 >> v3;
+        indices.push_back(v1);
+        indices.push_back(v2);
+        indices.push_back(v3);
+    }
+
+    file.close();
+
+    std::vector<glm::vec3> normals(numVertices);
+
+    std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, normals, indices);
+    mesh->updateNormals();
+
+    return mesh;
 }
