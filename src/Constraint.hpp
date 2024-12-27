@@ -206,11 +206,11 @@ struct VolumeConstraint : public Constraint {
     VolumeConstraint(uint p1, uint p2, uint p3, uint p4, const std::vector<glm::vec3> &pos, const float *alpha) {
         particles = {p1, p2, p3, p4};
         gradients.resize(4, glm::vec3(0));
-        initialVolume = calculateInitialVolume(pos);
+        initialVolume = calculateVolume(pos);
         this->alpha = alpha;
     }
 
-    float calculateInitialVolume(const std::vector<glm::vec3> &pos) const {
+    float calculateVolume(const std::vector<glm::vec3> &pos) const {
         const glm::vec3 &p1 = pos[particles[0]];
         const glm::vec3 &p2 = pos[particles[1]];
         const glm::vec3 &p3 = pos[particles[2]];
@@ -220,12 +220,7 @@ struct VolumeConstraint : public Constraint {
     }
 
     float eval(const std::vector<glm::vec3> &pos) const override {
-        const glm::vec3 &p1 = pos[particles[0]];
-        const glm::vec3 &p2 = pos[particles[1]];
-        const glm::vec3 &p3 = pos[particles[2]];
-        const glm::vec3 &p4 = pos[particles[3]];
-
-        float volume = glm::dot(glm::cross(p2 - p1, p3 - p1), p4 - p1);
+        float volume = calculateVolume(pos);
         return (volume - initialVolume);
     }
 
@@ -251,6 +246,67 @@ struct VolumeConstraint : public Constraint {
         float norm2 = 0.0f;
         for (size_t i = 0; i < gradients.size(); ++i) {
             norm2 += w[particles[i]] * glm::length2(gradients[i]);
+        }
+        return norm2;
+    }
+
+    bool isSatisfied(float val) const override {
+        return fabs(val) < 1e-3;
+    }
+};
+
+// TODO: only works with one object
+struct MeshVolumeConstraint : public Constraint {
+    float initialVolume;
+    const std::vector<uint> indices;
+
+    // Cache
+    mutable std::vector<glm::vec3> gradients;
+
+    MeshVolumeConstraint(const std::vector<uint> &indices, const std::vector<glm::vec3> &pos, const float *alpha) : indices(indices) {
+        particles.resize(pos.size(), 0);
+        for (int i = 0; i < pos.size(); i++) {
+            particles[i] = i;
+        }
+        gradients.resize(pos.size(), glm::vec3(0));
+        initialVolume = calculateVolume(pos);
+        this->alpha = alpha;
+    }
+
+    float calculateVolume(const std::vector<glm::vec3> &pos) const {
+        float V = 0;
+
+        for (int i = 0; i < indices.size(); i += 3) {
+            V += glm::dot(glm::cross(pos[indices[i]], pos[indices[i + 1]]), pos[indices[i + 2]]);
+        }
+        return V;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        float volume = calculateVolume(pos);
+        return volume - initialVolume;
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        std::fill(gradients.begin(), gradients.end(), glm::vec3(0));
+
+        for (int i = 0; i < indices.size(); i += 3) {
+            const glm::vec3 &p1 = pos[indices[i]];
+            const glm::vec3 &p2 = pos[indices[i + 1]];
+            const glm::vec3 &p3 = pos[indices[i + 2]];
+
+            gradients[indices[i]] += glm::cross(p2, p3);
+            gradients[indices[i + 1]] += glm::cross(p3, p1);
+            gradients[indices[i + 2]] += glm::cross(p1, p2);
+        }
+
+        return gradients;
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        float norm2 = 0.0f;
+        for (size_t i = 0; i < gradients.size(); ++i) {
+            norm2 += w[i] * glm::length2(gradients[i]);
         }
         return norm2;
     }

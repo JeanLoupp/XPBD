@@ -55,6 +55,8 @@ public:
     }
 
     Spheres(const Spheres &scene) : Spheres(scene.spawnParticles, scene.pRadius) {
+        this->alphaCollision = scene.alphaCollision;
+        this->alphaPlaneCollision = scene.alphaPlaneCollision;
     }
 
     ~Spheres() override {

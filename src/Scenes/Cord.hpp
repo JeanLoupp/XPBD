@@ -26,7 +26,9 @@ public:
         solver->addFixedPoint(0, glm::vec3(0));
     }
 
-    Cord(const Cord &scene) : Cord(scene.nParticles, scene.distance) {}
+    Cord(const Cord &scene) : Cord(scene.nParticles, scene.distance) {
+        this->alphaDistance = scene.alphaDistance;
+    }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         shaderProgram.use();

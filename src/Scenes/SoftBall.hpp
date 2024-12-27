@@ -2,19 +2,15 @@
 #include "Scene.hpp"
 #include "../utils.hpp"
 #include "imgui.h"
+#include <set>
 
-#include "../TetraMesh.hpp"
-
-#include <ctime>
-
-class SoftBody : public Scene {
+class SoftBall : public Scene {
 public:
     float alphaDistance = 1e-8;
     float alphaVolume = 1e-8;
     float alphaCollision = 1e-8;
 
-    SoftBody() {
-
+    SoftBall() {
         std::vector<Constraint *> constraints;
 
         plane = Mesh::createPlane();
@@ -23,47 +19,58 @@ public:
         const std::vector<glm::vec3> &v = plane->getVertices();
         semiPlane = new SemiPlane(v[0], v[1], v[2]);
 
-        float size = 1;
-        // body = TetraMesh::createCube(size);
-        body = TetraMesh::createBunny();
+        ball = Mesh::createFromOFF("data/mesh/sphere_one_sub.off");
 
-        const std::vector<glm::vec3> &pos = body->getPos();
-        const std::vector<uint> &edges = body->getEdges();
-        const std::vector<uint> &tets = body->getTets();
+        const std::vector<glm::vec3> &pos = ball->getVertices();
+        const std::vector<uint> &indices = ball->getIndices();
 
-        for (int i = 0; i < edges.size(); i += 2) {
-            constraints.push_back(new DistanceConstraint(edges[i], edges[i + 1], glm::length(pos[edges[i]] - pos[edges[i + 1]]), &alphaDistance));
+        constraints.push_back(new MeshVolumeConstraint(indices, pos, &alphaVolume));
+
+        // Compute unique edges
+        std::set<std::pair<uint, uint>> edgeSet;
+
+        for (int i = 0; i < indices.size(); i += 3) {
+            uint a = indices[i];
+            uint b = indices[i + 1];
+            uint c = indices[i + 2];
+
+            edgeSet.insert({std::min(a, b), std::max(a, b)});
+            edgeSet.insert({std::min(a, c), std::max(a, c)});
+            edgeSet.insert({std::min(b, c), std::max(b, c)});
         }
 
-        for (int i = 0; i < tets.size(); i += 4) {
-            constraints.push_back(new VolumeConstraint(tets[i], tets[i + 1], tets[i + 2], tets[i + 3], pos, &alphaVolume));
+        for (const auto &edge : edgeSet) {
+            const glm::vec3 &p1 = pos[edge.first];
+            const glm::vec3 &p2 = pos[edge.second];
+            constraints.push_back(new DistanceConstraint(edge.first, edge.second, glm::length(p1 - p2), &alphaDistance));
         }
 
         for (int i = 0; i < pos.size(); i++) {
-            constraints.push_back(new SemiPlaneConstraint(i, semiPlane, &alphaCollision, 0));
+            constraints.push_back(new SemiPlaneConstraint(i, semiPlane, &alphaCollision));
         }
 
         solver = new Solver(pos, constraints);
     }
 
-    SoftBody(const SoftBody &scene) : SoftBody() {
+    SoftBall(const SoftBall &scene) : SoftBall() {
         this->alphaCollision = scene.alphaCollision;
         this->alphaVolume = scene.alphaVolume;
         this->alphaDistance = scene.alphaDistance;
     }
 
-    ~SoftBody() override {
+    ~SoftBall() override {
         delete semiPlane;
     }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         shadowMap.beginRender();
-        shadowMap.addObject(body);
+        shadowMap.addObject(ball);
         shadowMap.endRender();
 
         shaderProgram.use();
-        body->udpatePos(solver->getPos());
-        body->draw(shaderProgram, glm::vec3(0.7, 0, 0), glm::mat4(1.0));
+        ball->setVertices(solver->getPos());
+        ball->updateNormals();
+        ball->draw(shaderProgram, glm::vec3(0, 0, 0.7), glm::mat4(1.0));
 
         checkerShaderProgram.use();
         shadowMap.sendShadowMap(checkerShaderProgram);
@@ -84,8 +91,7 @@ public:
 
 private:
     std::shared_ptr<Mesh> plane;
+    std::shared_ptr<Mesh> ball;
 
     SemiPlane *semiPlane;
-
-    std::shared_ptr<TetraMesh> body;
 };

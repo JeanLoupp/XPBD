@@ -67,9 +67,16 @@ public:
         glDisable(GL_CULL_FACE);
     }
 
-    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {}
+    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {
+        this->alphaCollision = scene.alphaCollision;
+        this->alphaDistance = scene.alphaDistance;
+        this->alphaBending = scene.alphaBending;
+    }
 
-    ~Cloth() override { glEnable(GL_CULL_FACE); }
+    ~Cloth() override {
+        delete semiPlane;
+        glEnable(GL_CULL_FACE);
+    }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
         mesh->setVertices(solver->getPos());
