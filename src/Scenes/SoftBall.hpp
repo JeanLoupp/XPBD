@@ -6,11 +6,13 @@
 
 class SoftBall : public Scene {
 public:
+    float pressure;
+
     float alphaDistance = 1e-8;
     float alphaVolume = 1e-8;
     float alphaCollision = 1e-8;
 
-    SoftBall() {
+    SoftBall(float pressure = 1.0f) : pressure(pressure) {
         std::vector<Constraint *> constraints;
 
         plane = Mesh::createPlane();
@@ -24,7 +26,7 @@ public:
         const std::vector<glm::vec3> &pos = ball->getVertices();
         const std::vector<uint> &indices = ball->getIndices();
 
-        constraints.push_back(new MeshVolumeConstraint(indices, pos, &alphaVolume));
+        constraints.push_back(new MeshVolumeConstraint(indices, pos, &this->pressure, &alphaVolume));
 
         // Compute unique edges
         std::set<std::pair<uint, uint>> edgeSet;
@@ -52,7 +54,7 @@ public:
         solver = new Solver(pos, constraints);
     }
 
-    SoftBall(const SoftBall &scene) : SoftBall() {
+    SoftBall(const SoftBall &scene) : SoftBall(scene.pressure) {
         this->alphaCollision = scene.alphaCollision;
         this->alphaVolume = scene.alphaVolume;
         this->alphaDistance = scene.alphaDistance;
@@ -79,6 +81,8 @@ public:
 
     bool showUI() override {
         bool changed = false;
+
+        ImGui::DragFloat("Pressure", &pressure, 0.01f, 0.1f, FLT_MAX);
 
         return changed;
     }

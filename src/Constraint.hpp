@@ -18,7 +18,7 @@ struct Constraint {
 
 // Distance between two particles is fixed
 struct DistanceConstraint : public Constraint {
-    float l0;
+    const float l0;
 
     DistanceConstraint(uint i, uint j, float l0, const float *alpha) : l0(l0) {
         particles = {i, j};
@@ -42,7 +42,7 @@ struct DistanceConstraint : public Constraint {
 
 // Particle pos is fixed
 struct PositionConstraint : public Constraint {
-    glm::vec3 x0;
+    const glm::vec3 x0;
 
     PositionConstraint(uint i, const glm::vec3 &x0, const float *alpha) : x0(x0) {
         particles = {i};
@@ -77,7 +77,7 @@ struct SemiPlane {
 // dist: distance above plane (by default: 0)
 struct SemiPlaneConstraint : public Constraint {
     SemiPlane *plane;
-    float dist;
+    const float dist;
 
     SemiPlaneConstraint(uint i, SemiPlane *plane, const float *alpha, float dist = 0.05f) : plane(plane), dist(dist) {
         particles = {i};
@@ -102,7 +102,7 @@ struct SemiPlaneConstraint : public Constraint {
 };
 
 struct BendingConstraint : public Constraint {
-    float angle;
+    const float angle;
 
     // Cache
     // mutable glm::vec3 n1, n2;
@@ -171,7 +171,7 @@ struct BendingConstraint : public Constraint {
 
 // Distance between two particles is greater than l0
 struct MinDistanceConstraint : public Constraint {
-    float l0;
+    const float l0;
 
     MinDistanceConstraint(uint i, uint j, float l0, const float *alpha) : l0(l0) {
         particles = {i, j};
@@ -258,13 +258,16 @@ struct VolumeConstraint : public Constraint {
 // TODO: only works with one object
 struct MeshVolumeConstraint : public Constraint {
     float initialVolume;
-    const std::vector<uint> indices;
+    const float *k; // pressure
+    std::vector<uint> indices;
 
     // Cache
     mutable std::vector<glm::vec3> gradients;
 
-    MeshVolumeConstraint(const std::vector<uint> &indices, const std::vector<glm::vec3> &pos, const float *alpha) : indices(indices) {
-        particles.resize(pos.size(), 0);
+    // Base pressure: 1.0f
+    MeshVolumeConstraint(const std::vector<uint> &indices, const std::vector<glm::vec3> &pos, float *pressure, const float *alpha)
+        : indices(indices), k(pressure) {
+        particles.reserve(pos.size());
         for (int i = 0; i < pos.size(); i++) {
             particles[i] = i;
         }
@@ -284,7 +287,7 @@ struct MeshVolumeConstraint : public Constraint {
 
     float eval(const std::vector<glm::vec3> &pos) const override {
         float volume = calculateVolume(pos);
-        return volume - initialVolume;
+        return volume - (*k) * initialVolume;
     }
 
     std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
