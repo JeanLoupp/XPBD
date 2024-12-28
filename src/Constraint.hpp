@@ -313,8 +313,4 @@ struct MeshVolumeConstraint : public Constraint {
         }
         return norm2;
     }
-
-    bool isSatisfied(float val) const override {
-        return fabs(val) < 1e-3;
-    }
 };

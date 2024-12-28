@@ -21,7 +21,8 @@ public:
         const std::vector<glm::vec3> &v = plane->getVertices();
         semiPlane = new SemiPlane(v[0], v[1], v[2]);
 
-        ball = Mesh::createFromOFF("data/mesh/sphere_one_sub.off");
+        ball = Mesh::createFromOFF("data/mesh/bunny.off");
+        ball->applyTransform(utils::getScale(10));
 
         const std::vector<glm::vec3> &pos = ball->getVertices();
         const std::vector<uint> &indices = ball->getIndices();
