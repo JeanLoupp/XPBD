@@ -13,7 +13,7 @@ public:
     float alphaBending = 1e-8;
     float alphaCollision = 1e-8;
 
-    Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = false)
+    Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = true)
         : w(w), h(h), distance(distance), bendingConstraints(bendingConstraints) {
 
         std::vector<glm::vec3> pos;
@@ -75,7 +75,6 @@ public:
 
     ~Cloth() override {
         delete semiPlane;
-        glEnable(GL_CULL_FACE);
     }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
