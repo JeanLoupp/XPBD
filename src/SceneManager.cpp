@@ -1,7 +1,6 @@
 #include "SceneManager.hpp"
 
 void SceneManager::resetScene() {
-    glEnable(GL_CULL_FACE);
     Scene *newScene = Scenes::createScene(sceneType, scene);
     newScene->solver->N_ITERATION = scene->solver->N_ITERATION;
     delete scene;
@@ -18,6 +17,7 @@ void SceneManager::updateScene() {
 }
 
 void SceneManager::setSceneType(SceneType sceneType) {
+    glEnable(GL_CULL_FACE);
     this->sceneType = sceneType;
     delete scene;
     scene = Scenes::createScene(sceneType);

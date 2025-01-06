@@ -8,7 +8,7 @@ set(PROJECT_NAME XPBD)
 
 project(${PROJECT_NAME})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # Ajoutez les fichiers sources de votre projet
 file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp)

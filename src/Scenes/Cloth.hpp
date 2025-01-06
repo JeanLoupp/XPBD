@@ -44,15 +44,15 @@ public:
 
                 // Bending
                 if (bendingConstraints) {
-                    if (x != w - 1 && y < h - 2)
-                        constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x + 1, M_PI, &alphaBending));
-                    if (y != h - 1 && x < w - 2)
-                        constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, (y + 1) * w + x + 2, M_PI, &alphaBending));
+                    // if (x != w - 1 && y < h - 2)
+                    //     constraints.push_back(new BendingConstraint((y + 1) * w + x, (y + 1) * w + x + 1, y * w + x, (y + 2) * w + x + 1, M_PI, &alphaBending));
+                    // if (y != h - 1 && x < w - 2)
+                    //     constraints.push_back(new BendingConstraint(y * w + x + 1, (y + 1) * w + x + 1, y * w + x, (y + 1) * w + x + 2, M_PI, &alphaBending));
 
-                    //     if (y < h - 2)
-                    //         constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2, &alphaBending));
-                    //     if (x < w - 2)
-                    //         constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2, &alphaBending));
+                    if (y < h - 2)
+                        constraints.push_back(new DistanceConstraint(y * w + x, (y + 2) * w + x, distance * 2, &alphaBending));
+                    if (x < w - 2)
+                        constraints.push_back(new DistanceConstraint(y * w + x, y * w + x + 2, distance * 2, &alphaBending));
                 }
             }
         }

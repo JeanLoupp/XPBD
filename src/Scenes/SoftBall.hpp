@@ -7,12 +7,13 @@
 class SoftBall : public Scene {
 public:
     float pressure;
+    int meshIdx;
 
     float alphaDistance = 1e-8;
     float alphaVolume = 1e-8;
     float alphaCollision = 1e-8;
 
-    SoftBall(float pressure = 1.0f) : pressure(pressure) {
+    SoftBall(float pressure = 1.0f, int meshIdx = 0) : pressure(pressure), meshIdx(meshIdx) {
         std::vector<Constraint *> constraints;
 
         plane = Mesh::createPlane();
@@ -21,8 +22,14 @@ public:
         const std::vector<glm::vec3> &v = plane->getVertices();
         semiPlane = new SemiPlane(v[0], v[1], v[2]);
 
-        ball = Mesh::createFromOFF("data/mesh/bunny.off");
-        ball->applyTransform(utils::getScale(10));
+        if (meshIdx == 0) {
+            ball = Mesh::createFromOFF("data/mesh/sphere_detailled.off");
+        } else if (meshIdx == 1) {
+            ball = Mesh::createFromOFF("data/mesh/sphere_one_sub.off");
+        } else if (meshIdx == 2) {
+            ball = Mesh::createFromOFF("data/mesh/bunny.off");
+            ball->applyTransform(utils::getScale(10));
+        }
 
         const std::vector<glm::vec3> &pos = ball->getVertices();
         const std::vector<uint> &indices = ball->getIndices();
@@ -55,7 +62,7 @@ public:
         solver = new Solver(pos, constraints);
     }
 
-    SoftBall(const SoftBall &scene) : SoftBall(scene.pressure) {
+    SoftBall(const SoftBall &scene) : SoftBall(scene.pressure, scene.meshIdx) {
         this->alphaCollision = scene.alphaCollision;
         this->alphaVolume = scene.alphaVolume;
         this->alphaDistance = scene.alphaDistance;
@@ -85,6 +92,10 @@ public:
 
         ImGui::DragFloat("Pressure", &pressure, 0.01f, 0.1f, FLT_MAX);
 
+        if (ImGui::Combo("Mesh", &meshIdx, names.data(), names.size())) {
+            changed = true;
+        }
+
         return changed;
     }
 
@@ -99,4 +110,6 @@ private:
     std::shared_ptr<Mesh> ball;
 
     SemiPlane *semiPlane;
+
+    static constexpr std::array<const char *, 3> names = {"sphere_detailled", "sphere_one_sub", "bunny"};
 };

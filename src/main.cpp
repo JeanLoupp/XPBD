@@ -26,8 +26,8 @@
 #include "ShadowMap.hpp"
 
 // Constants and global variables
-uint SCR_WIDTH = 800;
-uint SCR_HEIGHT = 800;
+uint SCR_WIDTH = 1000;
+uint SCR_HEIGHT = 1000;
 
 Camera camera(SCR_WIDTH, SCR_HEIGHT);
 GLFWwindow *window;
