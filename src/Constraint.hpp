@@ -249,10 +249,6 @@ struct VolumeConstraint : public Constraint {
         }
         return norm2;
     }
-
-    bool isSatisfied(float val) const override {
-        return fabs(val) < 1e-3;
-    }
 };
 
 // TODO: only works with one object

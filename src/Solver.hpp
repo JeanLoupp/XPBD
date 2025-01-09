@@ -14,6 +14,7 @@ public:
     void addFixedPoint(int index);
     void addFixedPoint(int index, const glm::vec3 &pos);
     void setPos(int index, const glm::vec3 &pos);
+    void setPos(const std::vector<glm::vec3> &pos);
 
     void removeFixedPoint(int index);
 

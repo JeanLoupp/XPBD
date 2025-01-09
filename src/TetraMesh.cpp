@@ -8,7 +8,7 @@ void TetraMesh::udpatePos(const std::vector<glm::vec3> &pos) {
         for (int i = 0; i < meshToPos.size(); i++) {
             vertices[i] = pos[meshToPos[i]];
         }
-        setVertices(vertices);
+        updateVertices();
     } else {
         setVertices(pos);
     }

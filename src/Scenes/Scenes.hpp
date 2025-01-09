@@ -6,6 +6,7 @@
 #include "Spheres.hpp"
 #include "SoftBody.hpp"
 #include "SoftBall.hpp"
+#include "RigidBody.hpp"
 
 enum class SceneType {
     CORD,
@@ -13,6 +14,7 @@ enum class SceneType {
     SPHERES,
     SOFTBODY,
     SOFTBALL,
+    RIGIDBODY,
 };
 
 class Scenes {
@@ -33,6 +35,9 @@ public:
 
         case SceneType::SOFTBALL:
             return new SoftBall(dynamic_cast<const SoftBall &>(*scene));
+
+        case SceneType::RIGIDBODY:
+            return new RigidBody(dynamic_cast<const RigidBody &>(*scene));
 
         default:
             std::cout << "Wrong scene type" << std::endl;
@@ -57,11 +62,14 @@ public:
         case SceneType::SOFTBALL:
             return new SoftBall();
 
+        case SceneType::RIGIDBODY:
+            return new RigidBody();
+
         default:
             std::cout << "Wrong scene type" << std::endl;
             return nullptr;
         }
     }
 
-    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Soft Body", "Soft Ball"};
+    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Soft Body", "Soft Ball", "Rigid Body"};
 };

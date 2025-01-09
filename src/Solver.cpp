@@ -31,6 +31,10 @@ void Solver::setPos(int index, const glm::vec3 &p) {
     x[index] = p;
 }
 
+void Solver::setPos(const std::vector<glm::vec3> &p) {
+    x = p;
+}
+
 // #define SUBSTEPS
 #ifndef SUBSTEPS
 void Solver::update(const float dt) {
@@ -81,7 +85,7 @@ void Solver::update(const float dt) {
 // Substeps
 void Solver::update(const float dt_) {
 
-    std::vector<glm::vec3> nextX(x.size());
+    std::vector<glm::vec3> nextX(nParticles);
 
     const float dt = dt_ / N_ITERATION;
 
@@ -104,7 +108,7 @@ void Solver::update(const float dt_) {
             std::vector<glm::vec3> grad = C[j]->evalGrad(nextX);
             float normGrad = C[j]->evalNorm2Grad(nextX, w);
 
-            const float alpha = *(C[j]->alpha) / (dt_ * dt_);
+            const float alpha = *(C[j]->alpha) / (dt * dt);
 
             float dlambda = -C_val / (normGrad + alpha);
 

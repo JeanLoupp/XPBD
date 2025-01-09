@@ -155,6 +155,12 @@ void Mesh::setVertices(const std::vector<glm::vec3> &vertices) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Mesh::updateVertices() {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(glm::vec3), vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void Mesh::applyTransform(const glm::mat4 &mat) {
     for (glm::vec3 &pos : vertices) {
         pos = glm::vec3(mat * glm::vec4(pos, 1.0f));

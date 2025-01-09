@@ -28,6 +28,8 @@ file(GLOB IMGUI_SOURCES
 include_directories(dep/imgui)
 include_directories(dep/imgui/backends)
 
+include_directories(dep/eigen)
+
 # Ajoutez l'exécutable
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES})
 

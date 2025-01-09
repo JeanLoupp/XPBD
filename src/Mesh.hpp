@@ -22,6 +22,7 @@ public:
     void endDrawMultiple();
 
     void updateNormals();
+    void updateVertices();
 
     void setVertices(const std::vector<glm::vec3> &vertices);
     void applyTransform(const glm::mat4 &mat);
