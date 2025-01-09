@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include "ShaderProgram.hpp"
+#include "render/ShaderProgram.hpp"
 
 class Mesh {
 public:

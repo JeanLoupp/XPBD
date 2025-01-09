@@ -10,6 +10,8 @@ project(${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
+include_directories(src)
+
 # Ajoutez les fichiers sources de votre projet
 file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp)
 
@@ -41,6 +43,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 add_subdirectory(dep/glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+
+target_include_directories(${PROJECT_NAME} PRIVATE dep/stb_image)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_DL_LIBS})
 

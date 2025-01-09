@@ -1,6 +1,6 @@
 #pragma once
 #include "Scene.hpp"
-#include "../utils.hpp"
+#include "utils/utils.hpp"
 #include "imgui.h"
 
 class Cord : public Scene {

@@ -1,6 +1,6 @@
 #include "ShadowMap.hpp"
 #include "stb_image_write.h"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 ShadowMap::ShadowMap(std::string vertexShader, std::string fragShader, const glm::vec3 &lightDir, const Camera &cam, int width, int height)
     : width(width), height(height), shaderProgram(vertexShader, fragShader) {

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "../ShaderProgram.hpp"
-#include "../Solver.hpp"
-#include "../Mesh.hpp"
-#include "../ShadowMap.hpp"
+#include "render/ShaderProgram.hpp"
+#include "simulation/Solver.hpp"
+#include "mesh/Mesh.hpp"
+#include "render/ShadowMap.hpp"
 #include "imgui.h"
 
 class Scene {

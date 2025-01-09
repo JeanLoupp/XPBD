@@ -2,9 +2,9 @@
 
 #include <string>
 #include <glm/glm.hpp>
-#include "ShaderProgram.hpp"
-#include "Mesh.hpp"
-#include "Camera.hpp"
+#include "render/ShaderProgram.hpp"
+#include "mesh/Mesh.hpp"
+#include "render/Camera.hpp"
 
 class ShadowMap {
 private:

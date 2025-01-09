@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SceneManager.hpp"
+#include "simulation/SceneManager.hpp"
 #include <GLFW/glfw3.h>
 
 class UserInterface {

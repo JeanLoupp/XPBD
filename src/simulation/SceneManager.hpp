@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ShaderProgram.hpp"
-#include "Scenes/Scenes.hpp"
-#include "Timer.hpp"
-#include "ShadowMap.hpp"
+#include "render/ShaderProgram.hpp"
+#include "scenes/Scenes.hpp"
+#include "utils/Timer.hpp"
+#include "render/ShadowMap.hpp"
 
 class SceneManager {
 public:

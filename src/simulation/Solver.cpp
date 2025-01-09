@@ -1,5 +1,5 @@
 #include "Solver.hpp"
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 Solver::Solver(const std::vector<glm::vec3> &pos, const std::vector<Constraint *> &constraints)
     : x(pos), nParticles(pos.size()), C(constraints), nConstraints(constraints.size()) {

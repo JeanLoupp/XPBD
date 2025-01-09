@@ -13,17 +13,16 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#include "ShaderProgram.hpp"
-#include "ComputeShader.hpp"
-#include "Camera.hpp"
-#include "Mesh.hpp"
-#include "Material.hpp"
-#include "Transformation.hpp"
-#include "utils.hpp"
-#include "Scenes/Scenes.hpp"
-#include "Timer.hpp"
-#include "UserInterface.hpp"
-#include "ShadowMap.hpp"
+#include "render/ShaderProgram.hpp"
+#include "render/ComputeShader.hpp"
+#include "render/Camera.hpp"
+#include "mesh/Mesh.hpp"
+#include "utils/Transformation.hpp"
+#include "utils/utils.hpp"
+#include "scenes/Scenes.hpp"
+#include "utils/Timer.hpp"
+#include "ui/UserInterface.hpp"
+#include "render/ShadowMap.hpp"
 
 // Constants and global variables
 uint SCR_WIDTH = 1000;

@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
-#include "utils.hpp"
+#include "utils/utils.hpp"
 
 struct Constraint {
     std::vector<uint> particles;

@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "Mesh.hpp"
-#include "Transformation.hpp"
-#include "utils.hpp"
+#include "mesh/Mesh.hpp"
+#include "utils/Transformation.hpp"
+#include "utils/utils.hpp"
 
 class Material {
 public:
