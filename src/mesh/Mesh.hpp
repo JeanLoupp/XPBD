@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<Mesh> createCube(float w = 1.0f);
     static std::shared_ptr<Mesh> createSphere(float radius = 1.0f, int resolution = 16);
     static std::shared_ptr<Mesh> createPlane();
-    static std::shared_ptr<Mesh> createPlane(const std::vector<glm::vec3> &pos, int w, int h);
+    static std::shared_ptr<Mesh> createPlane(const std::vector<glm::vec3> &pos, int w, int h, bool flipNormal = false);
     static std::shared_ptr<Mesh> createBox();
     static std::shared_ptr<Mesh> createQuad();
     static std::shared_ptr<Mesh> createTore(int resolution = 16);

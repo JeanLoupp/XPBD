@@ -11,6 +11,7 @@ public:
     bool bendingConstraints;
     float alphaDistance = 1e-8;
     float alphaBending = 1e-8;
+    float alphaPlaneCollision = 1e-8;
     float alphaCollision = 1e-8;
 
     Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = true)
@@ -27,7 +28,8 @@ public:
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * h / 2, distance * y));
+                // pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * h / 2, distance * y));
+                pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * (h - y), ((x * x + 3 * y) % 10 + 0.1) / 1000.0));
 
                 // Distance
                 if (x != w - 1)
@@ -40,7 +42,7 @@ public:
                 }
 
                 // Collision
-                constraints.push_back(new SemiPlaneConstraint(y * w + x, semiPlane, &alphaCollision));
+                constraints.push_back(new SemiPlaneConstraint(y * w + x, semiPlane, &alphaPlaneCollision, 0.01));
 
                 // Bending
                 if (bendingConstraints) {
@@ -57,18 +59,20 @@ public:
             }
         }
 
-        mesh = Mesh::createPlane(pos, w, h);
+        meshFront = Mesh::createPlane(pos, w, h);
+        meshBack = Mesh::createPlane(pos, w, h, true);
 
         solver = new Solver(pos, constraints);
 
-        solver->addFixedPoint(0, pos[0]);
-        solver->addFixedPoint(w - 1, pos[w - 1]);
+        // solver->addFixedPoint(0, pos[0]);
+        // solver->addFixedPoint(w - 1, pos[w - 1]);
 
-        glDisable(GL_CULL_FACE);
+        solver->activateGlobalCollision(distance, &alphaPlaneCollision);
     }
 
     Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {
         this->alphaCollision = scene.alphaCollision;
+        this->alphaPlaneCollision = scene.alphaPlaneCollision;
         this->alphaDistance = scene.alphaDistance;
         this->alphaBending = scene.alphaBending;
     }
@@ -78,15 +82,19 @@ public:
     }
 
     void draw(ShaderProgram &shaderProgram, ShaderProgram &checkerShaderProgram, ShadowMap &shadowMap) override {
-        mesh->setVertices(solver->getPos());
-        mesh->updateNormals();
+        meshFront->setVertices(solver->getPos());
+        meshFront->updateNormals();
+        meshBack->setVertices(solver->getPos());
+        meshBack->updateNormals();
 
         shadowMap.beginRender();
-        shadowMap.addObject(mesh);
+        shadowMap.addObject(meshFront);
+        shadowMap.addObject(meshBack);
         shadowMap.endRender();
 
         shaderProgram.use();
-        mesh->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
+        meshFront->draw(shaderProgram, glm::vec3(0.7), glm::mat4(1.0));
+        meshBack->draw(shaderProgram, glm::vec3(0.6), glm::mat4(1.0));
 
         checkerShaderProgram.use();
         shadowMap.sendShadowMap(checkerShaderProgram);
@@ -139,7 +147,8 @@ public:
     }
 
 private:
-    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Mesh> meshFront;
+    std::shared_ptr<Mesh> meshBack;
     std::shared_ptr<Mesh> plane;
     SemiPlane *semiPlane;
 };

@@ -17,7 +17,6 @@ void SceneManager::updateScene() {
 }
 
 void SceneManager::setSceneType(SceneType sceneType) {
-    glEnable(GL_CULL_FACE);
     this->sceneType = sceneType;
     delete scene;
     scene = Scenes::createScene(sceneType);

@@ -330,22 +330,36 @@ std::shared_ptr<Mesh> Mesh::createPlane() {
     return std::make_shared<Mesh>(vertices, normals, indices, "Plane");
 }
 
-std::shared_ptr<Mesh> Mesh::createPlane(const std::vector<glm::vec3> &pos, int w, int h) {
+std::shared_ptr<Mesh> Mesh::createPlane(const std::vector<glm::vec3> &pos, int w, int h, bool flipNormal) {
     std::vector<glm::vec3> vertices(pos);
 
     std::vector<glm::vec3> normals(pos.size(), glm::vec3(0));
 
     std::vector<uint> indices;
 
-    for (int i = 0; i < w - 1; i++) {
-        for (int j = 0; j < h - 1; j++) {
-            indices.push_back(j * w + i);
-            indices.push_back((j + 1) * w + i + 1);
-            indices.push_back(j * w + i + 1);
+    if (!flipNormal) {
+        for (int i = 0; i < w - 1; i++) {
+            for (int j = 0; j < h - 1; j++) {
+                indices.push_back(j * w + i);
+                indices.push_back((j + 1) * w + i + 1);
+                indices.push_back(j * w + i + 1);
 
-            indices.push_back(j * w + i);
-            indices.push_back((j + 1) * w + i);
-            indices.push_back((j + 1) * w + i + 1);
+                indices.push_back(j * w + i);
+                indices.push_back((j + 1) * w + i);
+                indices.push_back((j + 1) * w + i + 1);
+            }
+        }
+    } else {
+        for (int i = 0; i < w - 1; i++) {
+            for (int j = 0; j < h - 1; j++) {
+                indices.push_back(j * w + i);
+                indices.push_back(j * w + i + 1);
+                indices.push_back((j + 1) * w + i + 1);
+
+                indices.push_back(j * w + i);
+                indices.push_back((j + 1) * w + i + 1);
+                indices.push_back((j + 1) * w + i);
+            }
         }
     }
 
