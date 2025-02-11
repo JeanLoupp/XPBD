@@ -7,3 +7,6 @@ XPBD
 dep
 data/output
 data/videos
+*.pdf
+!Report.pdf
+*.zip
