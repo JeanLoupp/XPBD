@@ -1,6 +1,6 @@
 # XPBD
 
-Project for IG3DA. A report can be found [here](Report.pdf).
+Project for IG3DA class in Telecom Paris. A report can be found [here](Report.pdf).
 
 # Features
 - Rope, cloth, soft body simulation
@@ -27,4 +27,3 @@ make -C build
 - glfw: https://github.com/glfw/glfw
 - glm: https://github.com/g-truc/glm
 - glad: https://gen.glad.sh/
-
