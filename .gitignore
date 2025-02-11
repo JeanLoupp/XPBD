@@ -4,7 +4,6 @@ CMakeFiles
 CMakeCache.txt
 imgui.ini
 XPBD
-dep
 data/output
 data/videos
 *.pdf
