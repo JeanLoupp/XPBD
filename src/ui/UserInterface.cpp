@@ -47,6 +47,7 @@ void UserInterface::show() {
     ImGui::InputText("Output name", sceneManager->saveFilename, IM_ARRAYSIZE(sceneManager->saveFilename), flags);
 
     if (ImGui::CollapsingHeader("Solver parameters")) {
+        ImGui::Checkbox("Use substeps", &sceneManager->useSubsteps);
         ImGui::InputInt("Iterations", sceneManager->getSolverIterations(), 1, 10);
         if (*sceneManager->getSolverIterations() < 1) {
             *sceneManager->getSolverIterations() = 1;

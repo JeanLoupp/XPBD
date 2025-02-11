@@ -1,3 +1,5 @@
+// Helper class to load, send to GPU and transform a mesh
+
 #ifndef MESH_HPP
 #define MESH_HPP
 

@@ -2,10 +2,10 @@
 #include "utils/utils.hpp"
 #include "utils/SpatialGrid.hpp"
 
-Solver::Solver(const std::vector<glm::vec3> &pos, const std::vector<Constraint *> &constraints)
+Solver::Solver(const std::vector<glm::vec3> &pos, const std::vector<Constraint *> &constraints, float mass)
     : x(pos), nParticles(pos.size()), C(constraints), nConstraints(constraints.size()) {
     v = std::vector<glm::vec3>(nParticles, glm::vec3(0));
-    w = std::vector<float>(pos.size(), 1.0f / 0.1f);
+    w = std::vector<float>(pos.size(), 1.0f / mass);
 }
 
 Solver::~Solver() {
@@ -25,6 +25,7 @@ void Solver::addFixedPoint(int index, const glm::vec3 &pos) {
 }
 
 void Solver::removeFixedPoint(int index) {
+    // TODO: put previous mass instead of default
     w[index] = 1.0f / 0.1f; // infinite mass
 }
 
@@ -36,8 +37,6 @@ void Solver::setPos(const std::vector<glm::vec3> &p) {
     x = p;
 }
 
-#define SUBSTEPS
-#ifndef SUBSTEPS
 void Solver::update(const float dt) {
 
     std::vector<glm::vec3> nextX(x.size());
@@ -52,6 +51,14 @@ void Solver::update(const float dt) {
         else
             nextX[i] = x[i];
     }
+
+    if (useRigid) {
+        rigidMesh->shapeMatch(nextX);
+        nextX = rigidMesh->getPos();
+    }
+
+    generateCollisionConstraints();
+    generateFluidNeighbors();
 
     for (int n = 0; n < N_ITERATION; n++) {
         // Solve constraints
@@ -72,6 +79,11 @@ void Solver::update(const float dt) {
                 int index = C[j]->particles[i];
                 nextX[index] += dlambda * w[index] * grad[i];
             }
+
+            if (useRigid) {
+                rigidMesh->shapeMatch(nextX);
+                nextX = rigidMesh->getPos();
+            }
         }
     }
 
@@ -80,11 +92,11 @@ void Solver::update(const float dt) {
         v[i] = (nextX[i] - x[i]) / dt;
         x[i] = nextX[i];
     }
+
+    cleanCollisionConstraints();
 }
 
-#else
-// Substeps
-void Solver::update(const float dt_) {
+void Solver::updateSubsteps(const float dt_) {
 
     std::vector<glm::vec3> nextX(nParticles);
 
@@ -92,9 +104,10 @@ void Solver::update(const float dt_) {
 
     const glm::vec3 g(0, -9.81, 0);
 
-    float vmax = hCollision / 8.0f / dt;
+    float vmax = useGlobalCollision ? hCollision / 4.0f / dt : MAXFLOAT;
 
     generateCollisionConstraints();
+    generateFluidNeighbors();
 
     for (int n = 0; n < N_ITERATION; n++) {
         // Predict
@@ -136,6 +149,11 @@ void Solver::update(const float dt_) {
 
         applyFriction(nextX, dt);
 
+        if (useRigid) {
+            rigidMesh->shapeMatch(nextX);
+            nextX = rigidMesh->getPos();
+        }
+
         // Update
         for (int i = 0; i < nParticles; i++) {
             v[i] = (nextX[i] - x[i]) / dt;
@@ -155,7 +173,6 @@ void Solver::update(const float dt_) {
 
     cleanCollisionConstraints();
 }
-#endif
 
 void Solver::generateCollisionConstraints() {
     if (!useGlobalCollision) return;
@@ -225,4 +242,48 @@ void Solver::applyFriction(std::vector<glm::vec3> &nextX, const float dt) {
         nextX[p1] = nextX[p1] + d * (v_avg - v1);
         nextX[p2] = nextX[p2] + d * (v_avg - v2);
     }
+}
+
+void Solver::activateFluids() {
+    useFluids = true;
+}
+
+void Solver::generateFluidNeighbors() {
+    if (!useFluids) return;
+
+    SpatialGrid spatialGrid(DensityConstraint::h);
+
+    for (uint i = 0; i < x.size(); ++i) {
+        spatialGrid.addParticle(x[i], i);
+        C[i]->particles = {i};
+    }
+
+    auto &grid = spatialGrid.grid;
+
+    for (const auto &[cell, particles] : grid) {
+        // Go through 3x3x3 cells
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dz = -1; dz <= 1; ++dz) {
+                    Coordinates3D neighborCell(cell.x + dx, cell.y + dy, cell.z + dz);
+
+                    if (grid.find(neighborCell) != grid.end()) {
+                        const auto &neighborParticles = grid[neighborCell];
+
+                        for (uint p1 : particles) {
+                            for (uint p2 : neighborParticles) {
+                                if (p1 == p2) continue;
+                                C[p1]->particles.push_back(p2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Solver::activateRigid(RigidMesh *mesh) {
+    useRigid = true;
+    rigidMesh = mesh;
 }

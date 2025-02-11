@@ -2,6 +2,7 @@
 #include "Scene.hpp"
 #include "utils/utils.hpp"
 #include "imgui.h"
+#include <algorithm>
 
 class Cord : public Scene {
 public:
@@ -10,13 +11,17 @@ public:
     float distance;
     float alphaDistance = 1e-8;
 
-    Cord(int nParticles = 10, float distance = 0.5f) : nParticles(nParticles), distance(distance) {
+    Cord(int nParticles = 3, float distance = 0.5f) : nParticles(nParticles), distance(distance) {
 
         std::vector<glm::vec3> pos;
         std::vector<Constraint *> constraints;
 
+        glm::vec3 direction = {0.1, 1, 0};
+        direction = glm::normalize(direction) * distance;
+
         for (int i = 0; i < nParticles; i++) {
-            pos.push_back(glm::vec3(distance * i, 0, 0));
+            // pos.push_back(glm::vec3(distance * i, 0, 0));
+            pos.push_back(direction * (float)i);
 
             if (i != nParticles - 1)
                 constraints.push_back(new DistanceConstraint(i, i + 1, distance, &alphaDistance));
@@ -34,8 +39,11 @@ public:
         shaderProgram.use();
         circle->startDrawMultiple(shaderProgram);
 
+        // std::cout << std::endl;
+
         for (const glm::vec3 &pos : solver->getPos()) {
             circle->addDrawMultiple(shaderProgram, glm::vec3(0.7), utils::getTranslate(pos));
+            // std::cout << pos << std::endl;
         }
 
         circle->endDrawMultiple();

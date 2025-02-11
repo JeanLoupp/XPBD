@@ -1,3 +1,5 @@
+// Stores all the scenes available and allows them to be visible in the interface.
+
 #pragma once
 
 #include <variant>
@@ -7,6 +9,7 @@
 #include "SoftBody.hpp"
 #include "SoftBall.hpp"
 #include "RigidBody.hpp"
+#include "Fluid.hpp"
 
 enum class SceneType {
     CORD,
@@ -15,6 +18,7 @@ enum class SceneType {
     SOFTBODY,
     SOFTBALL,
     RIGIDBODY,
+    FLUID
 };
 
 class Scenes {
@@ -38,6 +42,9 @@ public:
 
         case SceneType::RIGIDBODY:
             return new RigidBody(dynamic_cast<const RigidBody &>(*scene));
+
+        case SceneType::FLUID:
+            return new Fluid(dynamic_cast<const Fluid &>(*scene));
 
         default:
             std::cout << "Wrong scene type" << std::endl;
@@ -65,11 +72,14 @@ public:
         case SceneType::RIGIDBODY:
             return new RigidBody();
 
+        case SceneType::FLUID:
+            return new Fluid();
+
         default:
             std::cout << "Wrong scene type" << std::endl;
             return nullptr;
         }
     }
 
-    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Soft Body", "Soft Ball", "Rigid Body"};
+    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Soft Body", "Soft Ball", "Rigid Body", "Fluid"};
 };

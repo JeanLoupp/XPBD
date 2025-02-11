@@ -41,7 +41,6 @@ int frameCount = 0;
 
 bool create_directories_if_needed(const std::string &filePath) {
     try {
-        // Récupère uniquement le chemin du dossier sans le fichier
         std::filesystem::path path(filePath);
         if (path.has_parent_path()) {
             std::filesystem::create_directories(path.parent_path());
@@ -53,21 +52,19 @@ bool create_directories_if_needed(const std::string &filePath) {
     }
 }
 
-// Fonction pour sauvegarder l'écran
 void SaveScreenshot(const char *filename) {
     std::vector<unsigned char> pixels(SCR_WIDTH * SCR_HEIGHT * 3); // RGB
 
-    // Lire les pixels de la fenêtre actuelle
     glReadPixels(0, 0, SCR_WIDTH, SCR_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
 
-    // Inverser l'image verticalement
+    // Invert image
     for (int y = 0; y < SCR_HEIGHT / 2; ++y) {
         for (int x = 0; x < SCR_WIDTH * 3; ++x) {
             std::swap(pixels[y * SCR_WIDTH * 3 + x], pixels[(SCR_HEIGHT - y - 1) * SCR_WIDTH * 3 + x]);
         }
     }
 
-    // Sauvegarder l'image au format PNG
+    // Save
     if (create_directories_if_needed(filename))
         if (stbi_write_png(filename, SCR_WIDTH, SCR_HEIGHT, 3, pixels.data(), SCR_WIDTH * 3)) {
             std::cout << "Screenshot saved to " << filename << std::endl;
@@ -197,7 +194,7 @@ int main() {
 
     ShaderProgram shaderProgram("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
     ShaderProgram checkerShaderProgram("shaders/vertex_shader.glsl", "shaders/checker_frag.glsl");
-    ShadowMap shadowMap("shaders/vertexShaderShadowMap.glsl", "shaders/fragmentShaderShadowMap.glsl", lightDir, camera, 1024, 1024);
+    ShadowMap shadowMap("shaders/vertexShaderShadowMap.glsl", "shaders/fragmentShaderShadowMap.glsl", lightDir, camera, 2048, 2048);
 
     sceneManager.setSceneType(SceneType::CORD);
 

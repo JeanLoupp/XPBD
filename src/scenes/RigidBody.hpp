@@ -1,3 +1,5 @@
+// This scene does not work
+
 #pragma once
 #include "Scene.hpp"
 #include "utils/utils.hpp"
@@ -24,7 +26,9 @@ public:
         semiPlane = new SemiPlane(v[0], v[1], v[2]);
 
         int res = 10;
-        body = RigidMesh::createCube(res);
+        // body = RigidMesh::createCube(res);
+        body = RigidMesh::createFromOFF("data/mesh/bunny-low-poly.off");
+        body->applyTransform(utils::getScale(1e-2));
 
         sphere = Mesh::createSphere(1.5 / res);
 
@@ -35,6 +39,7 @@ public:
         }
 
         solver = new Solver(pos, constraints);
+        solver->activateRigid(body.get());
     }
 
     RigidBody(const RigidBody &scene) : RigidBody() {
@@ -53,9 +58,6 @@ public:
         shadowMap.endRender();
 
         shaderProgram.use();
-        body->shapeMatch(solver->getPos());
-        solver->setPos(body->getPos());
-
         if (!showSpheres)
             body->draw(shaderProgram, glm::vec3(0.7, 0, 0), glm::mat4(1.0));
         else

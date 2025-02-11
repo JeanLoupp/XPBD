@@ -1,5 +1,6 @@
 #include "RigidMesh.hpp"
 #include <Eigen/Dense>
+#include <set>
 
 glm::mat3 tensorProduct(const glm::vec3 &a, const glm::vec3 &b) {
     return {a.x * b.x, a.x * b.y, a.x * b.z,
@@ -18,12 +19,15 @@ glm::mat3 polarDecomposition(const glm::mat3 &M) {
 
 void RigidMesh::applyTransform(const glm::mat4 &mat) {
     for (int i = 0; i < vertices.size(); i++) {
-        vertices[i] = originalPos[i];
+        vertices[i] = glm::vec3(mat * glm::vec4(vertices[i], 1.0f));
     }
     for (int i = 0; i < pos.size(); i++) {
         pos[i] = glm::vec3(mat * glm::vec4(pos[i], 1.0f));
         originalPos[i] = glm::vec3(mat * glm::vec4(originalPos[i], 1.0f));
     }
+
+    originalCOM = computeCOM(pos);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(glm::vec3), vertices.data());
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -53,7 +57,6 @@ void RigidMesh::shapeMatch(const std::vector<glm::vec3> &predict_pos) {
     }
 
     const glm::mat3 R = polarDecomposition(M);
-    const glm::mat3 Rinv = inverse(R);
 
     for (int i = 0; i < pos.size(); i++) {
         pos[i] = R * (originalPos[i] - originalCOM) + COM;
@@ -226,4 +229,85 @@ std::shared_ptr<RigidMesh> RigidMesh::createCube(int resolution, float w) {
         2, 3, 7, 6};
 
     return std::make_shared<RigidMesh>(pos, meshToPos, vertices, normals, indices);
+}
+
+std::shared_ptr<RigidMesh> RigidMesh::createFromOFF(const std::string &filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + filePath);
+    }
+
+    std::string line;
+    // Read the header
+    std::getline(file, line);
+    if (line != "OFF") {
+        throw std::runtime_error("File is not in OFF format.");
+    }
+
+    // Read the number of vertices, faces, and edges
+    size_t numVertices = 0, numFaces = 0, numEdges = 0;
+    std::getline(file, line);
+    std::istringstream headerStream(line);
+    headerStream >> numVertices >> numFaces >> numEdges;
+
+    std::vector<glm::vec3> vertices;
+    std::vector<uint> indices;
+
+    // Read vertices
+    for (size_t i = 0; i < numVertices; ++i) {
+        float x, y, z;
+        std::getline(file, line);
+        std::istringstream vertexStream(line);
+        vertexStream >> x >> y >> z;
+        vertices.emplace_back(x, y, z);
+    }
+
+    // Read faces
+    for (size_t i = 0; i < numFaces; ++i) {
+        std::getline(file, line);
+        std::istringstream faceStream(line);
+        size_t faceSize;
+        faceStream >> faceSize;
+        if (faceSize != 3) {
+            throw std::runtime_error("Only triangular faces are supported.");
+        }
+        uint v1, v2, v3;
+        faceStream >> v1 >> v2 >> v3;
+        indices.push_back(v1);
+        indices.push_back(v2);
+        indices.push_back(v3);
+    }
+
+    file.close();
+
+    std::vector<glm::vec3> normals(numVertices);
+
+    std::vector<uint> meshToPos;
+
+    std::shared_ptr<RigidMesh> mesh = std::make_shared<RigidMesh>(vertices, meshToPos, vertices, normals, indices);
+    mesh->updateNormals();
+
+    return mesh;
+}
+
+std::vector<uint> RigidMesh::generateEdges() {
+    std::set<std::pair<uint, uint>> edgeSet;
+
+    for (int i = 0; i < indices.size(); i += 3) {
+        uint a = indices[i];
+        uint b = indices[i + 1];
+        uint c = indices[i + 2];
+
+        edgeSet.insert({std::min(a, b), std::max(a, b)});
+        edgeSet.insert({std::min(a, c), std::max(a, c)});
+        edgeSet.insert({std::min(b, c), std::max(b, c)});
+    }
+
+    std::vector<uint> edges;
+    for (const auto &edge : edgeSet) {
+        edges.push_back(edge.first);
+        edges.push_back(edge.second);
+    }
+
+    return edges;
 }

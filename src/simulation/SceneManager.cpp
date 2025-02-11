@@ -12,7 +12,10 @@ void SceneManager::updateScene() {
     dt = timer.elapsed();
     if (saveVideo) dt = 1.0f / 60;
     if (play) {
-        scene->update(dt);
+        if (!useSubsteps)
+            scene->solver->update(dt);
+        else
+            scene->solver->updateSubsteps(dt);
     }
 }
 

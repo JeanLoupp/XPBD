@@ -1,21 +1,16 @@
 # XPBD
 
-Project for IG3DA
+Project for IG3DA. A report can be found [here](Report.pdf).
 
 # Features
-- Edit and save scenes
-- Switch from rasterizer to raytracer
-- Spheres, Torus, and any shape with triangles
+- Rope, cloth, soft body simulation
+- UI to change parameters
 
 # Controls
-- Press SPACE to toggle Raytracing
-- Press P to take a screenshot
+- Use the mouse and left click to move the camera
+- Right click to grab a particle
 - Scroll to zoom in/out
-- Use mouse to turn around subject
 
-# TODO
-- Add a triangle mesh for torus (they appear as circles in the rasterizer)
-- Fix flickering at the bottom of the image with some scenes
 
 ## First build
 
@@ -23,7 +18,7 @@ Project for IG3DA
 mkdir build
 cmake -B build
 make -C build
-./Raytracing
+./XPBD
 ```
 
 ## Dependencies
@@ -32,11 +27,4 @@ make -C build
 - glfw: https://github.com/glfw/glfw
 - glm: https://github.com/g-truc/glm
 - glad: https://gen.glad.sh/
-
-You may need to generate your glad files for your machine.
-
-# Gallery
-![demo](<data/output/JO boite reflet.png>)
-![demo](<data/output/JO full reflets.png>)
-![demo](<data/output/balls.png>)
 

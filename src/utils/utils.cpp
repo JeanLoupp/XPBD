@@ -1,3 +1,5 @@
+// Helper function to generate transformation matrices and also allows to print glm::vec and glm::mat.
+
 #include "utils.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

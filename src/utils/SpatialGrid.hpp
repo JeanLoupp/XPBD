@@ -1,3 +1,9 @@
+// Helper class to create a spatial hash to accelerate collision detection
+// To use:
+//    - Define h as the dimension of each cell
+//    - Add particles to the grid with addParticles
+//    - Use grid to get the neighbors
+
 #pragma once
 
 #include <unordered_map>

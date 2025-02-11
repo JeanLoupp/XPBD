@@ -9,13 +9,15 @@ public:
     int w, h;
     float distance;
     bool bendingConstraints;
+    bool collisionConstraint;
+    bool spawnVertical;
     float alphaDistance = 1e-8;
     float alphaBending = 1e-8;
     float alphaPlaneCollision = 1e-8;
     float alphaCollision = 1e-8;
 
-    Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = true)
-        : w(w), h(h), distance(distance), bendingConstraints(bendingConstraints) {
+    Cloth(int w = 64, int h = 64, float distance = 0.05f, bool bendingConstraints = true, bool collisionConstraint = false, bool spawnVertical = false)
+        : w(w), h(h), distance(distance), bendingConstraints(bendingConstraints), collisionConstraint(collisionConstraint), spawnVertical(spawnVertical) {
 
         std::vector<glm::vec3> pos;
         std::vector<Constraint *> constraints;
@@ -28,8 +30,10 @@ public:
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                // pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * h / 2, distance * y));
-                pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * (h - y), ((x * x + 3 * y) % 10 + 0.1) / 1000.0));
+                if (!spawnVertical)
+                    pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * h / 2, distance * y));
+                else
+                    pos.push_back(glm::vec3(distance * x - distance * (w - 1) / 2, distance * (h - y), ((x * x + 3 * y) % 10 + 0.1) / 10000.0));
 
                 // Distance
                 if (x != w - 1)
@@ -64,13 +68,16 @@ public:
 
         solver = new Solver(pos, constraints);
 
-        // solver->addFixedPoint(0, pos[0]);
-        // solver->addFixedPoint(w - 1, pos[w - 1]);
+        if (!spawnVertical) {
+            solver->addFixedPoint(0, pos[0]);         // + glm::vec3(0.5, 0, 0));
+            solver->addFixedPoint(w - 1, pos[w - 1]); // - glm::vec3(0.5, 0, 0));
+        }
 
         solver->activateGlobalCollision(distance, &alphaPlaneCollision);
+        solver->setGlobalCollision(collisionConstraint);
     }
 
-    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints) {
+    Cloth(const Cloth &scene) : Cloth(scene.w, scene.h, scene.distance, scene.bendingConstraints, scene.collisionConstraint, scene.spawnVertical) {
         this->alphaCollision = scene.alphaCollision;
         this->alphaPlaneCollision = scene.alphaPlaneCollision;
         this->alphaDistance = scene.alphaDistance;
@@ -103,6 +110,14 @@ public:
 
     bool showUI() override {
         bool changed = false;
+
+        if (ImGui::Checkbox("Use self collision", &collisionConstraint)) {
+            solver->setGlobalCollision(collisionConstraint);
+        }
+
+        if (ImGui::Checkbox("Spawn vertical", &spawnVertical)) {
+            changed = true;
+        }
 
         int newW = w;
         if (ImGui::InputInt("Width", &newW)) {

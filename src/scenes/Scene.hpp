@@ -1,3 +1,9 @@
+// Virtual class to handle scenes
+// Children must implement:
+//   - draw: display the scene, called at most 60 times per seconds
+//   - showUI: use ImGui to access the parameters of the scene
+//   - showConstraintUI: use ImGui to change constraint stiffness
+
 #pragma once
 
 #include <memory>
@@ -18,8 +24,6 @@ public:
     virtual bool showUI() { return false; }
     virtual void showConstraintUI() {}
 
-    void update(const float dt) { solver->update(dt); };
-
     const std::vector<glm::vec3> &getPos() { return solver->getPos(); }
 };
 
@@ -29,9 +33,8 @@ inline void alphaSelector(const char *label, float &alpha) {
     int powerOf10 = floorf(log10f(alpha));
     float multiplier = alpha / pow(10.0f, powerOf10);
 
-    ImGui::PushID(label); // Ajouter un ID unique pour éviter les conflits de widgets
+    ImGui::PushID(label); // Unique ID to avoid conflicts
 
-    // Limiter la largeur des champs pour que tout tienne dans la ligne
     float availableWidth = ImGui::GetContentRegionAvail().x; // Largeur disponible
     float multiplierWidth = availableWidth * 0.4f;           // 40% pour le multiplicateur
     float powerWidth = availableWidth * 0.2f;                // 20% pour la puissance de 10
@@ -54,7 +57,7 @@ inline void alphaSelector(const char *label, float &alpha) {
     ImGui::SetNextItemWidth(powerWidth);
     ImGui::DragInt("##powerOf10", &powerOf10, 1, -16, 1);
 
-    ImGui::PopID(); // Restaurer l'ID
+    ImGui::PopID(); // Restore ID
 
     if (powerOf10 < -16) {
         alpha = 1e-16;

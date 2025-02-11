@@ -5,6 +5,12 @@
 #include <glm/gtx/norm.hpp>
 #include "utils/utils.hpp"
 
+// Virtual class to handle constraints
+// Children must implement:
+//   - eval: evaluate the constraint
+//   - evalGrad: evaluate the gradient of the constraint
+//   - evalNorm2Grad: compute the denominator of lambda in the solver
+
 struct Constraint {
     std::vector<uint> particles;
     const float *alpha;
@@ -256,19 +262,25 @@ struct MeshVolumeConstraint : public Constraint {
     float initialVolume;
     const float *k; // pressure
     std::vector<uint> indices;
+    uint startIndex;
 
     // Cache
     mutable std::vector<glm::vec3> gradients;
 
     // Base pressure: 1.0f
-    MeshVolumeConstraint(const std::vector<uint> &indices, const std::vector<glm::vec3> &pos, float *pressure, const float *alpha)
-        : indices(indices), k(pressure) {
+    MeshVolumeConstraint(const std::vector<uint> &indices, const std::vector<glm::vec3> &pos, float *pressure, const float *alpha, uint startIndex = 0)
+        : indices(indices), k(pressure), startIndex(startIndex) {
         particles.reserve(pos.size());
         for (int i = 0; i < pos.size(); i++) {
-            particles[i] = i;
+            particles[i] = i + startIndex;
         }
+
         gradients.resize(pos.size(), glm::vec3(0));
         initialVolume = calculateVolume(pos);
+
+        for (int i = 0; i < indices.size(); i++) {
+            this->indices[i] += startIndex;
+        }
         this->alpha = alpha;
     }
 
@@ -294,9 +306,9 @@ struct MeshVolumeConstraint : public Constraint {
             const glm::vec3 &p2 = pos[indices[i + 1]];
             const glm::vec3 &p3 = pos[indices[i + 2]];
 
-            gradients[indices[i]] += glm::cross(p2, p3);
-            gradients[indices[i + 1]] += glm::cross(p3, p1);
-            gradients[indices[i + 2]] += glm::cross(p1, p2);
+            gradients[indices[i] - startIndex] += glm::cross(p2, p3);
+            gradients[indices[i + 1] - startIndex] += glm::cross(p3, p1);
+            gradients[indices[i + 2] - startIndex] += glm::cross(p1, p2);
         }
 
         return gradients;
@@ -306,6 +318,73 @@ struct MeshVolumeConstraint : public Constraint {
         float norm2 = 0.0f;
         for (size_t i = 0; i < gradients.size(); ++i) {
             norm2 += w[i] * glm::length2(gradients[i]);
+        }
+        return norm2;
+    }
+};
+
+struct DensityConstraint : public Constraint {
+    inline static float d0 = 1000;
+    inline static float h = 0.02;
+    inline static float m = 0.001;
+
+    uint p0;
+
+    // Cache
+    mutable std::vector<glm::vec3> gradients;
+
+    DensityConstraint(uint p0, const float *alpha)
+        : p0(p0) {
+        this->alpha = alpha;
+    }
+
+    static float W_poly6(const glm::vec3 &p1, const glm::vec3 &p2) {
+        float r = glm::length(p1 - p2);
+        if (r > h) return 0;
+
+        return 315.0f / (64.0f * M_PI * pow(h, 9)) * pow(h * h - r * r, 3);
+    }
+
+    static glm::vec3 gW_spiky(const glm::vec3 &p1, const glm::vec3 &p2) {
+        float r = glm::length(p1 - p2);
+        if (r > h) return glm::vec3(0);
+
+        return (float)(-45.0f / (M_PI * pow(h, 6)) * pow(h - r, 2)) * (p1 - p2) / r;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        float d = 0;
+
+        for (int j : particles) {
+            d += m * W_poly6(pos[p0], pos[j]);
+        }
+
+        return d - d0;
+    }
+
+    bool isSatisfied(float val) const override {
+        return val <= 0;
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        if (gradients.size() != particles.size()) {
+            gradients.resize(particles.size());
+        }
+
+        gradients[0] = glm::vec3(0);
+
+        for (int i = 1; i < particles.size(); i++) {
+            gradients[i] = -m * gW_spiky(pos[p0], pos[particles[i]]);
+            gradients[0] += -gradients[i];
+        }
+
+        return gradients;
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        float norm2 = 0.0f;
+        for (size_t i = 0; i < gradients.size(); ++i) {
+            norm2 += w[particles[i]] * glm::length2(gradients[i]);
         }
         return norm2;
     }

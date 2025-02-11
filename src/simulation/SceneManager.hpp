@@ -1,3 +1,5 @@
+// Handles initialization and reset of scenes, as well as updates and grabbing.
+
 #pragma once
 
 #include "render/ShaderProgram.hpp"
@@ -38,6 +40,8 @@ public:
     void setSaveVideo(bool value) { saveVideo = value; }
 
     char saveFilename[128] = "video";
+
+    bool useSubsteps = false;
 
 private:
     Scene *scene;

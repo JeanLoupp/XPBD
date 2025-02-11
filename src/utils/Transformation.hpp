@@ -1,3 +1,5 @@
+// Helper class that stores rotations, translations and scaling
+
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
 

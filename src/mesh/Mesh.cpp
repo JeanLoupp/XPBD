@@ -9,7 +9,6 @@
 
 #define PI 3.14159265359
 
-// Constructeur de la classe Mesh
 Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<uint> &indices, const std::string &name)
     : vertices(vertices), normals(normals), indices(indices), indexCount(indices.size()), name(name) {
 
@@ -77,7 +76,6 @@ Mesh::Mesh(const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> 
     glBindVertexArray(0);
 }
 
-// Fonction pour dessiner le maillage
 void Mesh::draw(uint shaderProgram, const glm::vec3 &color, const glm::mat4 &modelMat) {
     glUseProgram(shaderProgram);
 
@@ -171,7 +169,6 @@ void Mesh::applyTransform(const glm::mat4 &mat) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-// Destructeur de la classe Mesh
 Mesh::~Mesh() {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -180,7 +177,6 @@ Mesh::~Mesh() {
     glDeleteVertexArrays(1, &VAO);
 }
 
-// Fonction statique pour créer un cube
 std::shared_ptr<Mesh> Mesh::createCube(float w) {
     std::vector<glm::vec3> vertices = {
         // Arrière
