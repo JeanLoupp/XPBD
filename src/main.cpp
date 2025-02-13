@@ -203,7 +203,8 @@ int main() {
     // Boucle de rendu
     while (!glfwWindowShouldClose(window)) {
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1, 0.1, 0.3, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         beginRender(shaderProgram);
@@ -212,16 +213,16 @@ int main() {
         sceneManager.updateScene();
         sceneManager.drawScene(shaderProgram, checkerShaderProgram, shadowMap);
 
-        userInterface.show();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
         if (sceneManager.getSaveVideo() && sceneManager.getPlay()) {
             std::string filename = "data/output/" + std::string(sceneManager.saveFilename) + "/" + std::to_string(frameCount) + ".png";
             SaveScreenshot(filename.c_str());
             frameCount++;
         }
+
+        userInterface.show();
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     glfwDestroyWindow(window);

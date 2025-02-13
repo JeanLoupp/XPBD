@@ -186,7 +186,6 @@ struct MinDistanceConstraint : public Constraint {
 
     float eval(const std::vector<glm::vec3> &pos) const override {
         return glm::length(pos[particles[0]] - pos[particles[1]]) - l0;
-        return (pos[particles[0]] - pos[particles[1]]).length() - l0;
     }
 
     bool isSatisfied(float val) const override {
@@ -200,6 +199,95 @@ struct MinDistanceConstraint : public Constraint {
 
     float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
         return 1.0f * w[particles[0]] + 1.0f * w[particles[1]];
+    }
+};
+
+// Distance from p0 is greater than l0
+struct SphereCollisionConstraint : public Constraint {
+    glm::vec3 *p0;
+    const float l0;
+
+    SphereCollisionConstraint(uint i, glm::vec3 *p0, float l0, const float *alpha) : l0(l0), p0(p0) {
+        particles = {i};
+        this->alpha = alpha;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        return glm::length(pos[particles[0]] - *p0) - l0;
+    }
+
+    bool isSatisfied(float val) const override {
+        return val >= 0;
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        return {glm::normalize(pos[particles[0]] - *p0)};
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        return 1.0f * w[particles[0]];
+    }
+};
+
+// Distance from triangle abc from p0 is greater than l0
+struct SphereTriCollisionConstraint : public Constraint {
+    glm::vec3 *p0;
+    const float l0;
+
+    mutable glm::vec3 hitPoint;
+
+    SphereTriCollisionConstraint(uint a, uint b, uint c, glm::vec3 *p0, float l0, const float *alpha) : l0(l0), p0(p0) {
+        particles = {a, b, c};
+        this->alpha = alpha;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        const glm::vec3 &a = pos[particles[0]];
+        const glm::vec3 &b = pos[particles[1]];
+        const glm::vec3 &c = pos[particles[2]];
+
+        glm::vec3 n = glm::normalize(glm::cross(b - a, c - a));
+
+        glm::vec3 Pproj = *p0 - glm::dot(n, *p0 - a) * n;
+
+        // Test if projected point is outside triangle
+        for (int i = 0; i < 3; i++) {
+            const glm::vec3 &orig = pos[particles[i]];
+            const glm::vec3 &dest = pos[particles[(i + 1) % 3]];
+
+            bool inside = glm::dot(glm::cross(dest - orig, Pproj - orig), n) > 0;
+
+            if (!inside) {
+                // Return closest distance to segment or point
+                float t = -glm::dot(orig - *p0, dest - orig) / glm::length2(dest - orig);
+
+                // If not in [0, 1]: closest to point
+                t = glm::clamp(t, 0.0f, 1.0f);
+
+                glm::vec3 closest = orig + t * (dest - orig);
+
+                hitPoint = closest;
+
+                return glm::length(*p0 - closest) - l0;
+            }
+        }
+
+        // Projected point is inside triangle
+        hitPoint = Pproj;
+        return glm::length(*p0 - Pproj) - l0;
+    }
+
+    bool isSatisfied(float val) const override {
+        return val >= 0;
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        glm::vec3 dir = glm::normalize(hitPoint - *p0);
+        return {dir, dir, dir};
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        return 1.0f * w[particles[0]] + 1.0f * w[particles[1]] + 1.0f * w[particles[2]];
     }
 };
 

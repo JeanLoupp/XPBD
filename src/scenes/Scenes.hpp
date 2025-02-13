@@ -5,6 +5,7 @@
 #include <variant>
 #include "Cord.hpp"
 #include "Cloth.hpp"
+#include "ClothDrop.hpp"
 #include "Spheres.hpp"
 #include "SoftBody.hpp"
 #include "SoftBall.hpp"
@@ -14,6 +15,7 @@
 enum class SceneType {
     CORD,
     CLOTH,
+    CLOTHDROP,
     SPHERES,
     SOFTBODY,
     SOFTBALL,
@@ -30,6 +32,9 @@ public:
 
         case SceneType::CLOTH:
             return new Cloth(dynamic_cast<const Cloth &>(*scene));
+
+        case SceneType::CLOTHDROP:
+            return new ClothDrop(dynamic_cast<const ClothDrop &>(*scene));
 
         case SceneType::SPHERES:
             return new Spheres(dynamic_cast<const Spheres &>(*scene));
@@ -60,6 +65,9 @@ public:
         case SceneType::CLOTH:
             return new Cloth();
 
+        case SceneType::CLOTHDROP:
+            return new ClothDrop();
+
         case SceneType::SPHERES:
             return new Spheres();
 
@@ -81,5 +89,6 @@ public:
         }
     }
 
-    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Spheres", "Soft Body", "Soft Ball", "Rigid Body", "Fluid"};
+    inline static const std::vector<const char *> sceneNames = {"Cord", "Cloth", "Cloth Drop", "Spheres",
+                                                                "Soft Body", "Soft Ball", "Rigid Body", "Fluid"};
 };

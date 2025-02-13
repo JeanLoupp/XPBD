@@ -76,6 +76,7 @@ void ShadowMap::sendShadowMap(ShaderProgram &otherShaderProgram) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthMapTexture);
     otherShaderProgram.set("shadowMap.depthMap", 0);
+    otherShaderProgram.set("shadowMap.use", true);
 }
 
 void ShadowMap::saveDepthMap(const std::string &filepath) {

@@ -10,6 +10,41 @@ uniform vec3 viewPos;     // Position de la caméra
 uniform vec3 lightColor;  // Couleur de la lumière
 uniform vec3 objectColor; // Couleur de l'objet
 
+
+struct ShadowMap {
+    bool use;
+    mat4 MVP;
+    sampler2D depthMap;
+};
+uniform ShadowMap shadowMap;
+
+float getShadow(){
+    if (!shadowMap.use) return 1.0f;
+
+    vec4 posLightSpace = shadowMap.MVP * vec4(FragPos, 1.0);
+    posLightSpace /= posLightSpace.w;
+    posLightSpace = (posLightSpace + 1.0) * 0.5;
+
+    // Compare depth + smooth lightning
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap.depthMap, 0);
+    const int radius = 2;
+    for (int x = -radius; x <= radius; ++x) {
+        for (int y = -radius; y <= radius; ++y) {
+            float pcfDepth = texture(shadowMap.depthMap, posLightSpace.xy + vec2(x, y) * texelSize).r;
+            if (posLightSpace.z < pcfDepth + 0.003) {
+                shadow += 1.0;
+            }
+        }
+    }
+    shadow /= float((2*radius + 1) * (2*radius + 1));
+
+    if(posLightSpace.z > 1.0)
+        shadow = 1.0;
+
+    return shadow;
+}
+
 void main() {
     vec3 norm = normalize(Normal);
     
@@ -27,7 +62,11 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
     vec3 specular = specularStrength * spec * lightColor;
 
+    // Shadow
+    float shadow = getShadow();
+
     // Résultat final
-    vec3 result = ambient * objectColor + diffuse * objectColor + specular;
+    vec3 result = ambient * objectColor 
+                + shadow * (diffuse * objectColor + specular);
     FragColor = vec4(result, 1.0);
 }

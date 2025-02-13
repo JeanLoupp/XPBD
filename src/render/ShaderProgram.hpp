@@ -21,6 +21,7 @@ public:
     void use() { glUseProgram(programID); };
 
     void set(const GLchar *name, int i) { glUniform1i(glGetUniformLocation(programID, name), i); };
+    void set(const GLchar *name, bool b) { glUniform1i(glGetUniformLocation(programID, name), b); };
     void set(const GLchar *name, float val) { glUniform1f(glGetUniformLocation(programID, name), val); };
     void set(const GLchar *name, const glm::vec3 &vec) { glUniform3fv(glGetUniformLocation(programID, name), 1, glm::value_ptr(vec)); };
     void set(const GLchar *name, const glm::mat4 &mat) { glUniformMatrix4fv(glGetUniformLocation(programID, name), 1, GL_FALSE, glm::value_ptr(mat)); };
