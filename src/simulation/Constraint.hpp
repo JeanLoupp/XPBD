@@ -229,6 +229,43 @@ struct SphereCollisionConstraint : public Constraint {
     }
 };
 
+// dir: direction of cylinder
+// p: point belonging to axis
+// r: radius
+struct Cylinder {
+    glm::vec3 dir, p;
+    float r;
+
+    Cylinder(const glm::vec3 &dir, const glm::vec3 &p, float r) : dir(dir), p(p), r(r) {}
+};
+
+struct CylinderCollisionConstraint : public Constraint {
+    Cylinder *cylinder;
+
+    CylinderCollisionConstraint(uint i, Cylinder *cylinder, const float *alpha) : cylinder(cylinder) {
+        particles = {i};
+        this->alpha = alpha;
+    }
+
+    float eval(const std::vector<glm::vec3> &pos) const override {
+        float t = -glm::dot(cylinder->p - pos[particles[0]], cylinder->dir);
+        return glm::length((cylinder->p + t * cylinder->dir) - pos[particles[0]]) - cylinder->r;
+    }
+
+    bool isSatisfied(float val) const override {
+        return val >= 0;
+    }
+
+    std::vector<glm::vec3> evalGrad(const std::vector<glm::vec3> &pos) const override {
+        float t = -glm::dot(cylinder->p - pos[particles[0]], cylinder->dir);
+        return {glm::normalize(pos[particles[0]] - (cylinder->p + t * cylinder->dir))};
+    }
+
+    float evalNorm2Grad(const std::vector<glm::vec3> &pos, const std::vector<float> &w) const override {
+        return 1.0f * w[particles[0]];
+    }
+};
+
 // Distance from triangle abc from p0 is greater than l0
 struct SphereTriCollisionConstraint : public Constraint {
     glm::vec3 *p0;

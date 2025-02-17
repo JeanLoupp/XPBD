@@ -306,6 +306,65 @@ std::shared_ptr<Mesh> Mesh::createSphere(float radius, int resolution) {
     return std::make_shared<Mesh>(vertices, normals, indices, "Sphere");
 }
 
+std::shared_ptr<Mesh> Mesh::createCylinder(float L, float r, uint resolution) {
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
+    std::vector<uint> indices;
+
+    uint total = 2 * resolution;
+
+    // Lateral face
+    for (uint i = 0; i < resolution; i++) {
+        float theta = 2 * i * PI / resolution;
+
+        vertices.emplace_back(-L / 2, r * cos(theta), r * sin(theta));
+        vertices.emplace_back(L / 2, r * cos(theta), r * sin(theta));
+
+        normals.emplace_back(0, r * cos(theta), r * sin(theta));
+        normals.emplace_back(0, r * cos(theta), r * sin(theta));
+
+        // First face
+        indices.push_back((2 * i) % total);
+        indices.push_back((2 * i + 2) % total);
+        indices.push_back((2 * i + 1) % total);
+
+        // Second face
+        indices.push_back((2 * i + 1) % total);
+        indices.push_back((2 * i + 2) % total);
+        indices.push_back((2 * i + 3) % total);
+    }
+
+    // Base centers
+    uint baseIdx1 = vertices.size();
+    uint baseIdx2 = vertices.size() + 1;
+
+    vertices.emplace_back(-L / 2, 0, 0);
+    vertices.emplace_back(L / 2, 0, 0);
+
+    // Bases
+    for (int i = 0; i < resolution; i++) {
+        float theta = 2 * i * PI / resolution;
+
+        vertices.emplace_back(-L / 2, r * cos(theta), r * sin(theta));
+        vertices.emplace_back(L / 2, r * cos(theta), r * sin(theta));
+
+        normals.emplace_back(-1, 0, 0);
+        normals.emplace_back(1, 0, 0);
+
+        // First face
+        indices.push_back((2 * i) % total + baseIdx1 + 2);
+        indices.push_back(baseIdx1);
+        indices.push_back((2 * i + 2) % total + baseIdx1 + 2);
+
+        // Second face
+        indices.push_back((2 * i) % total + baseIdx2 + 2);
+        indices.push_back((2 * i + 2) % total + baseIdx2 + 2);
+        indices.push_back(baseIdx2);
+    }
+
+    return std::make_shared<Mesh>(vertices, normals, indices, "Cylinder");
+}
+
 std::shared_ptr<Mesh> Mesh::createPlane() {
     std::vector<glm::vec3> vertices = {
         {-1.0f, 0, 1.0f},
@@ -326,35 +385,37 @@ std::shared_ptr<Mesh> Mesh::createPlane() {
     return std::make_shared<Mesh>(vertices, normals, indices, "Plane");
 }
 
-std::shared_ptr<Mesh> Mesh::createPlane(const std::vector<glm::vec3> &pos, int w, int h, bool flipNormal) {
+std::shared_ptr<Mesh> Mesh::createPlane(const std::vector<glm::vec3> &pos, int w, int h, bool flipNormal, bool closePlane) {
     std::vector<glm::vec3> vertices(pos);
 
     std::vector<glm::vec3> normals(pos.size(), glm::vec3(0));
 
     std::vector<uint> indices;
 
+    int H = closePlane ? h : h - 1;
+
     if (!flipNormal) {
         for (int i = 0; i < w - 1; i++) {
-            for (int j = 0; j < h - 1; j++) {
+            for (int j = 0; j < H; j++) {
                 indices.push_back(j * w + i);
-                indices.push_back((j + 1) * w + i + 1);
+                indices.push_back((j + 1) % h * w + i + 1);
                 indices.push_back(j * w + i + 1);
 
                 indices.push_back(j * w + i);
-                indices.push_back((j + 1) * w + i);
-                indices.push_back((j + 1) * w + i + 1);
+                indices.push_back((j + 1) % h * w + i);
+                indices.push_back((j + 1) % h * w + i + 1);
             }
         }
     } else {
         for (int i = 0; i < w - 1; i++) {
-            for (int j = 0; j < h - 1; j++) {
+            for (int j = 0; j < H; j++) {
                 indices.push_back(j * w + i);
                 indices.push_back(j * w + i + 1);
-                indices.push_back((j + 1) * w + i + 1);
+                indices.push_back((j + 1) % h * w + i + 1);
 
                 indices.push_back(j * w + i);
-                indices.push_back((j + 1) * w + i + 1);
-                indices.push_back((j + 1) * w + i);
+                indices.push_back((j + 1) % h * w + i + 1);
+                indices.push_back((j + 1) % h * w + i);
             }
         }
     }
